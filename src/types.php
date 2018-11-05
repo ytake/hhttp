@@ -1,9 +1,9 @@
 <?hh // strict
 
-namespace Ytrake\Hhttp;
+namespace Ytake\Hhttp;
 
 type ParsedUrlShape = shape(
-  ?'schema' => string,
+  ?'scheme' => string,
   ?'host' => string,
   ?'port' => ?int,
   ?'user' => string,

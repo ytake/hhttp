@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace Ytrake\Hhttp;
+namespace Ytake\Hhttp;
 
 use type Psr\Http\Message\StreamInterface;
 use namespace HH\Lib\{Str, Dict};

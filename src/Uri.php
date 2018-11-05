@@ -1,13 +1,15 @@
-<?hh // strict
+<?hh
 
-namespace Ytrake\Hhttp;
+namespace Ytake\Hhttp;
 
-use Psr\Http\Message\UriInterface;
+use type Psr\Http\Message\UriInterface;
+
+use namespace Ytake\Hhttp\Exception;
 use namespace HH\Lib\{Str, C};
-
 use function preg_replace_callback;
 use function is_null;
 use function array_key_exists;
+use function rawurlencode;
 
 final class Uri implements UriInterface {
   
@@ -20,7 +22,6 @@ final class Uri implements UriInterface {
 
   private static string $charUnreserved = 'a-zA-Z0-9_\-\.~';
   private static string $charSubDelims = '!\$&\'\(\)\*\+,;=';
-
   private string $scheme = '';
   private string $userInfo = '';
   private string $host = '';
@@ -33,12 +34,13 @@ final class Uri implements UriInterface {
     if ('' !== $uri) {
       $parts = $this->parseUrl($uri);
       if (0 === C\count(Shapes::toArray($parts))) {
-        throw new \InvalidArgumentException("Unable to parse URI: $uri");
+        throw new Exception\UriFormatException("Unable to parse URI: $uri");
       }
       $this->extract($parts);
     }
   }
 
+  <<__Rx>>
   public function __toString(): string {
     return self::createUriString(
       $this->scheme, 
@@ -49,10 +51,12 @@ final class Uri implements UriInterface {
     );
   }
 
+  <<__Rx>>
   public function getScheme(): string {
     return $this->scheme;
   }
 
+  <<__Rx>>
   public function getAuthority(): string {
     if ('' === $this->host) {
       return '';
@@ -61,37 +65,43 @@ final class Uri implements UriInterface {
     if ('' !== $this->userInfo) {
       $authority = $this->userInfo.'@'.$authority;
     }
-    if (null !== $this->port) {
+    if ($this->port is nonnull) {
       $authority .= ':'.$this->port;
     }
     return $authority;
   }
 
-  public function getUserInfo(): string {
+  <<__Rx>>
+  public function getUserInfo(): string{
     return $this->userInfo;
   }
 
+  <<__Rx>>
   public function getHost(): string {
     return $this->host;
   }
-
+  
+  <<__Rx>>
   public function getPort(): ?int {
     return $this->port;
   }
-
+  
+  <<__Rx>>
   public function getPath(): string {
     return $this->path;
   }
-
+  
+  <<__Rx>>
   public function getQuery(): string {
     return $this->query;
   }
 
+  <<__Rx>>
   public function getFragment(): string {
     return $this->fragment;
   }
 
-  public function withScheme(string $scheme): this {
+  public function withScheme($scheme): UriInterface {
     if ($this->scheme === $scheme = $this->filterScheme($scheme)) {
       return $this;
     }
@@ -101,12 +111,11 @@ final class Uri implements UriInterface {
     return $new;
   }
 
-  public function withUserInfo(string $user, ?string $password = null): this {
+  public function withUserInfo($user, $password = null): UriInterface {
     $info = $user;
-    if (null !== $password && '' !== $password) {
+    if ($password is nonnull && '' !== $password) {
       $info .= ':'.$password;
     }
-
     if ($this->userInfo === $info) {
       return $this;
     }
@@ -115,7 +124,7 @@ final class Uri implements UriInterface {
     return $new;
   }
 
-  public function withHost(string $host): this {
+  public function withHost($host): UriInterface {
     if ($this->host === $host = $this->filterHost($host)) {
       return $this;
     }
@@ -124,7 +133,8 @@ final class Uri implements UriInterface {
     return $new;
   }
 
-  public function withPort(?int $port): this {
+  // ?int
+  public function withPort($port): UriInterface {
     if ($this->port === $port = $this->filterPort($port)) {
       return $this;
     }
@@ -133,7 +143,7 @@ final class Uri implements UriInterface {
     return $new;
   }
 
-  public function withPath(string $path): this {
+  public function withPath($path): UriInterface {
     if ($this->path === $path = $this->filterPath($path)) {
       return $this;
     }
@@ -143,7 +153,7 @@ final class Uri implements UriInterface {
   }
 
 
-  public function withQuery(string $query): this {
+  public function withQuery($query): UriInterface {
     if ($this->query === $query = $this->filterQueryAndFragment($query)) {
       return $this;
     }
@@ -152,7 +162,7 @@ final class Uri implements UriInterface {
     return $new;
   }
 
-  public function withFragment(string $fragment): this {
+  public function withFragment($fragment): UriInterface {
     if ($this->fragment === $fragment = $this->filterQueryAndFragment($fragment)) {
       return $this;
     }
@@ -162,33 +172,33 @@ final class Uri implements UriInterface {
   }
   
   private function extract(ParsedUrlShape $parts): void {
-    $result = Shapes::idx($parts, 'schema');
-    if(!is_null($result)) {
+    $result = Shapes::idx($parts, 'scheme');
+    if ($result is nonnull) {
       $this->scheme = $this->filterScheme($result);
     }
     $this->userInfo = Shapes::idx($parts, 'user', '');
     $result = Shapes::idx($parts, 'host', '');
-    if(!is_null($result)) {
+    if ($result is nonnull) {
       $this->host = $this->filterHost($result);
     }
     $result = Shapes::idx($parts, 'port');
-    if(!is_null($result)) {
+    if ($result is nonnull) {
       $this->port = $this->filterPort($result);
     }
     $result = Shapes::idx($parts, 'path');
-    if(!is_null($result)) {
+    if ($result is nonnull) {
       $this->path = $this->filterPath($result);
     }
     $result = Shapes::idx($parts, 'query');
-    if(!is_null($result)) {
+    if ($result is nonnull) {
       $this->query = $this->filterQueryAndFragment($result);
     }
     $result = Shapes::idx($parts, 'fragment');
-    if(!is_null($result)) {
+    if ($result is nonnull) {
       $this->fragment = $this->filterQueryAndFragment($result);
     }
     $result = Shapes::idx($parts, 'pass');
-    if(Str\is_empty($result)) {
+    if(!Str\is_empty($result)) {
       $this->userInfo .= ':'.$result;
     }
   }
@@ -208,7 +218,6 @@ final class Uri implements UriInterface {
     if ('' !== $authority) {
       $uri .= '//'.$authority;
     }
-
     if ('' !== $path) {
       $chunked = Str\chunk($path);
       if ('/' !== $chunked[0]) {
@@ -217,7 +226,7 @@ final class Uri implements UriInterface {
         }
       } elseif (array_key_exists(1, $chunked) && '/' === $chunked[1]) {
         if ('' === $authority) {
-          $path = '/'.\ltrim($path, '/');
+          $path = '/'.Str\trim_left($path, '/');
         }
       }
       $uri .= $path;
@@ -231,6 +240,7 @@ final class Uri implements UriInterface {
     return $uri;
   }
 
+  <<__Rx>>
   private function isNonStandardPort(string $scheme, int $port): bool {
     return $this->schemes->contains($scheme) || $this->schemes->at($scheme) !== $port;
   }
@@ -243,30 +253,32 @@ final class Uri implements UriInterface {
     return Str\lowercase($host);
   }
 
+  <<__Rx>>
   private function filterPort(?int $port): ?int {
-    if (null === $port) {
+    if (!$port is nonnull) {
       return null;
     }
     if (1 > $port || 0xffff < $port) {
-      throw new \InvalidArgumentException(\sprintf('Invalid port: %d. Must be between 1 and 65535', $port));
+      throw new \InvalidArgumentException(
+        Str\format('Invalid port: %d. Must be between 1 and 65535', $port)
+      );
     }
     return $this->isNonStandardPort($this->scheme, $port) ? $port : null;
   }
 
   private function filterPath(string $path): string {
-    return preg_replace_callback('/(?:[^'.self::$charUnreserved.self::$charSubDelims.'%:@\/]++|%(?![A-Fa-f0-9]{2}))/', [$this, 'rawurlencodeMatchZero'], $path);
+    return preg_replace_callback(
+      '/(?:[^'.self::$charUnreserved.self::$charSubDelims.'%:@\/]++|%(?![A-Fa-f0-9]{2}))/',
+      (array<int, string> $match) ==> rawurlencode($match[0]),
+      $path
+    );
   }
   
   private function filterQueryAndFragment(string $str): string {
     return preg_replace_callback(
       '/(?:[^'. self::$charUnreserved . self::$charSubDelims . '%:@\/\?]++|%(?![A-Fa-f0-9]{2}))/',
-      [$this, 'rawurlencodeMatchZero'],
+      (array<int, string> $match) ==> rawurlencode($match[0]),
       $str
     );
-  }
-
-  <<__Rx>>
-  private function rawurlencodeMatchZero(array<int, string> $match): string {
-    return \rawurlencode($match[0]);
   }
 }
