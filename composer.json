@@ -1,0 +1,40 @@
+{
+  "name": "ytake/hhttp",
+  "description": "HTTP Requesr and Response",
+  "minimum-stability": "stable",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "hack",
+    "hhvm"
+  ],
+  "authors": [
+    {
+      "name": "Yuuki Takezawa",
+      "email": "yuuki.takezawa@comnect.jp.net"
+    }
+  ],
+  "require": {
+    "psr/http-server-middleware": "^1.0",
+    "psr/http-server-handler": "^1.0",
+    "psr/http-message": "^1.0",
+    "psr/container": "^1.0",
+    "hack-psr/psr7-http-message-hhi": "^1.0.0",
+    "ytake/psr-http-handlers-hhi": "^1.1.0"
+  },
+  "require-dev": {
+    "hhvm/hacktest": "^1.0",
+    "facebook/fbexpect": "^2.1.3",
+    "hhvm/hhast": ">=3.28.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ytake\\Hhttp\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "classmap": [
+      "tests/"
+    ]
+  }
+}
