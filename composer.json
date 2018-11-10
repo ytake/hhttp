@@ -21,7 +21,8 @@
     "psr/http-factory": "^1.0",
     "psr/container": "^1.0",
     "hack-psr/psr7-http-message-hhi": "^1.0.0",
-    "ytake/psr-http-handlers-hhi": "^1.1.0"
+    "ytake/psr-http-handlers-hhi": "^1.1.0",
+    "hhvm/hsl-experimental": "^3.29"
   },
   "require-dev": {
     "hhvm/hacktest": "^1.0",

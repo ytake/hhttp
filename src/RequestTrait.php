@@ -4,6 +4,7 @@ namespace Ytake\Hhttp;
 
 use type Psr\Http\Message\UriInterface;
 use type Psr\Http\Message\RequestInterface;
+use namespace HH\Lib\{Str, C};
 
 use function preg_match;
 
@@ -12,10 +13,50 @@ trait RequestTrait {
   use MessageTrait;
   require implements RequestInterface;
 
-  private string $method;
+  private ?string $method;
   private ?string $requestTarget;
   private UriInterface $uri;
   
+  private  function initialize(
+    mixed $uri = null,
+    ?string $method = null,
+    mixed $body = 'php://memory',
+    Map<string, varray<string>> $headers = Map{}
+  ) : void {
+    if ($method !== null) {
+      $this->setMethod($method);
+    }
+    $this->uri    = $this->createUri($uri);
+    $this->stream = $this->getStream($body, 'wb+');
+    $this->setHeaders($headers);
+
+    if (! $this->hasHeader('Host') && $this->uri->getHost()) {
+      $this->headerNames->add(Pair{'host', 'Host'});
+      $this->headers->add(Pair{'Host', [$this->getHostFromUri()]});
+    }
+  }
+
+  private function createUri(mixed $uri) : UriInterface {
+    if ($uri is UriInterface) {
+      return $uri;
+    }
+    if ($uri is string) {
+      return new Uri($uri);
+    }
+    if ($uri === null) {
+      return new Uri();
+    }
+    throw new Exception\InvalidArgumentException(
+      'Invalid URI provided; must be null, a string, or a Psr\Http\Message\UriInterface instance'
+    );
+  }
+
+  private function getHostFromUri() : string {
+    $host  = $this->uri->getHost();
+    $host .= $this->uri->getPort() ? ':' . $this->uri->getPort() : '';
+    return $host;
+  }
+
   public function getRequestTarget(): string {
     if ($this->requestTarget is nonnull) {
       return $this->requestTarget;
@@ -33,7 +74,7 @@ trait RequestTrait {
     return $target;
   }
 
-  public function withRequestTarget(string $requestTarget): this {
+  public function withRequestTarget($requestTarget): this {
     if (preg_match('#\s#', $requestTarget)) {
       throw new \InvalidArgumentException('Invalid request target provided; cannot contain whitespace');
     }
@@ -44,7 +85,10 @@ trait RequestTrait {
   
   <<__Rx>>
   public function getMethod(): string {
-    return $this->method;
+    if ($this->method is string) {
+      return $this->method;
+    }
+    return '';
   }
 
   public function withMethod($method): this {
@@ -54,6 +98,16 @@ trait RequestTrait {
     $new = clone $this;
     $new->method = $method;
     return $new;
+  }
+
+  private function setMethod(string $method): void {
+    if (! preg_match('/^[!#$%&\'*+.^_`\|~0-9a-z-]+$/i', $method)) {
+      throw new Exception\InvalidArgumentException(Str\format(
+        'Unsupported HTTP method "%s" provided',
+        $method
+      ));
+    }
+    $this->method = $method;
   }
 
   <<__Rx>>

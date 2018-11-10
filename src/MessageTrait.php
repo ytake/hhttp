@@ -3,19 +3,67 @@
 namespace Ytake\Hhttp;
 
 use type Psr\Http\Message\StreamInterface;
-use namespace HH\Lib\{Str, Dict};
+use namespace HH\Lib\{Str};
 
+use function array_map;
 use function is_numeric;
+use function array_values;
 
 trait MessageTrait {
   
-  private Map<string, array<string>> $headers = Map{};
+  private Map<string, varray<string>> $headers = Map{};
   private Map<string, string> $headerNames = Map{};
 
   private string $protocol = '1.1';
 
   private ?StreamInterface $stream;
   
+  private function setHeaders(Map<string, varray<string>> $originalHeaders) : void {
+    $headerNames = $headers = [];
+    foreach ($originalHeaders as $header => $value) {
+      $value = $this->filterHeaderValue($value);
+      $this->assertHeader($header);
+      $headerNames[Str\lowercase($header)] = $header;
+      $headers[$header] = $value;
+    }
+    $this->headerNames = new Map($headerNames);
+    $this->headers = new Map($headers);
+  }
+
+  private function getStream(mixed $stream, string $modeIfNotInstance) : StreamInterface {
+    if ($stream is StreamInterface) {
+      return $stream;
+    }
+    if (!$stream is string && !$stream is resource) {
+      throw new Exception\InvalidArgumentException(
+        'Stream must be a string stream resource identifier, '
+        . 'an actual stream resource, '
+        . 'or a Psr\Http\Message\StreamInterface implementation'
+      );
+    }
+    return new Stream($stream, $modeIfNotInstance);
+  }
+
+  private function assertHeader(string $name) : void {
+    AssertHeader::assertValidName($name);
+  }
+
+  private function filterHeaderValue(mixed $values): varray<string> {
+    if (! is_array($values)) {
+      $values = [$values];
+    }
+    if ([] === $values) {
+      throw new Exception\InvalidArgumentException(
+        'Invalid header value: must be a string or array of strings; '
+        . 'cannot be an empty array'
+      );
+    }
+    return array_map(($value) ==> {
+      AssertHeader::assertValid($value);
+      return (string) $value;
+    }, array_values($values));
+  }
+
   <<__Rx>>
   public function getProtocolVersion(): string {
     return $this->protocol;
@@ -82,6 +130,11 @@ trait MessageTrait {
     $new->headers->remove($header);
     $new->headerNames->remove($normalized);
     return $new;
+  }
+
+  public function getBody(): StreamInterface {
+    invariant(($this->stream is nonnull), "resource error");
+    return $this->stream;
   }
 
   public function withBody(StreamInterface $body): this {
