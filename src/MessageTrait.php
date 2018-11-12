@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh 
 
 namespace Ytake\Hhttp;
 
@@ -6,18 +6,17 @@ use type Psr\Http\Message\StreamInterface;
 use namespace HH\Lib\{Str};
 
 use function array_map;
-use function is_numeric;
 use function array_values;
 
 trait MessageTrait {
-  
+
   private Map<string, varray<string>> $headers = Map{};
   private Map<string, string> $headerNames = Map{};
 
   private string $protocol = '1.1';
 
   private ?StreamInterface $stream;
-  
+
   private function setHeaders(Map<string, varray<string>> $originalHeaders) : void {
     $headerNames = $headers = [];
     foreach ($originalHeaders as $header => $value) {
@@ -65,11 +64,11 @@ trait MessageTrait {
   }
 
   <<__Rx>>
-  public function getProtocolVersion(): string {
+  public function getProtocolVersion() {
     return $this->protocol;
   }
 
-  public function withProtocolVersion(string $version): this {
+  public function withProtocolVersion($version) {
     if ($this->protocol === $version) {
       return $this;
     }
@@ -78,28 +77,27 @@ trait MessageTrait {
     return $new;
   }
 
-  <<__Rx>>
-  public function getHeaders(): array<string, array<string>> {
+  public function getHeaders() {
     return $this->headers->toArray();
   }
 
-  public function hasHeader(string $header): bool {
+  public function hasHeader($header) {
     return $this->headerNames->contains(Str\lowercase($header));
   }
-  
-  public function getHeader(string $header): array<string> {
+
+  public function getHeader($header) {
     $header = Str\lowercase($header);
     if (!$this->headerNames->contains($header)) {
       return [];
     }
     return $this->headers->at($this->headerNames->at($header));
   }
-  
-  public function getHeaderLine(string $header): string {
+
+  public function getHeaderLine($header) {
     return Str\join($this->getHeader($header), ', ');
   }
 
-  public function withHeader(string $header, mixed $value): this {
+  public function withHeader($header, $value) {
     $value = $this->validateAndTrimHeader($header, $value);
     $normalized = Str\lowercase($header);
     $new = clone $this;
@@ -111,7 +109,7 @@ trait MessageTrait {
     return $new;
   }
 
-  public function withAddedHeader(string $name, mixed $value): this {
+  public function withAddedHeader($name, $value) {
     if (!$name is string || '' === $name) {
       throw new \InvalidArgumentException('Header name must be an RFC 7230 compatible string.');
     }
@@ -120,7 +118,7 @@ trait MessageTrait {
     return $new;
   }
 
-  public function withoutHeader(string $header): this {
+  public function withoutHeader($header) {
     $normalized = Str\lowercase($header);
     if (!$this->headerNames->contains($normalized)) {
       return $this;
@@ -132,12 +130,12 @@ trait MessageTrait {
     return $new;
   }
 
-  public function getBody(): StreamInterface {
+  public function getBody() {
     invariant(($this->stream is nonnull), "resource error");
     return $this->stream;
   }
 
-  public function withBody(StreamInterface $body): this {
+  public function withBody(StreamInterface $body) {
     if ($body === $this->stream) {
       return $this;
     }
@@ -156,7 +154,8 @@ trait MessageTrait {
       }
       return [Str\trim((string) $values, " \t")];
     }
-    if (\is_null($values) || $values == '') {
+    
+    if (!$values is nonnull || $values === '') {
       throw new \InvalidArgumentException('Header values must be a string or an array of strings, empty array given.');
     }
     $returnValues = [];

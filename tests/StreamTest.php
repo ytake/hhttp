@@ -3,7 +3,6 @@
 use type Ytake\Hhttp\Stream;
 use type Facebook\HackTest\HackTest;
 
-use function strval;
 use function Facebook\FBExpect\expect;
 
 final class StreamTest extends HackTest {

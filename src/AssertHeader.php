@@ -1,10 +1,9 @@
-<?hh // strict 
+<?hh // strict
 
 namespace Ytake\Hhttp;
 
 use namespace HH\Lib\{Str, Regex};
 
-use function strlen;
 use function ord;
 use function in_array;
 use function preg_match;
@@ -44,7 +43,7 @@ final class AssertHeader {
     }
     return $string;
   }
-  
+
   public static function isValid(mixed $value) : bool {
     $value  = (string) $value;
     if (Regex\matches($value, re"#(?:(?:(?<!\r)\n)|(?:\r(?!\n))|(?:\r\n(?![ \t])))#")) {

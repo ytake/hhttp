@@ -46,7 +46,7 @@ final class Stream implements StreamInterface {
       'x+t' => true, 'c+t' => true, 'a' => true, 'a+' => true,
     },
   };
-  
+
   public function __construct(mixed $body, string $mode = 'rw+') {
     if ($body is string) {
       $resource = fopen($body, $mode);
@@ -81,7 +81,7 @@ final class Stream implements StreamInterface {
     }
     $this->detach();
   }
-  
+
   public function detach(): ?resource {
     if (!$this->stream is nonnull) {
       return null;
@@ -92,7 +92,7 @@ final class Stream implements StreamInterface {
     $this->readable = $this->writable = $this->seekable = false;
     return $result;
   }
-  
+
   public function getSize(): ?int {
     if (null !== $this->size) {
       return $this->size;

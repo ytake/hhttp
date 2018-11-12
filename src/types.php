@@ -12,3 +12,12 @@ type ParsedUrlShape = shape(
   ?'query' => string,
   ?'fragment' => string
 );
+
+enum HttpMethod : string {
+  HEAD = 'HEAD';
+  GET = 'GET';
+  POST = 'POST';
+  PATCH = 'PATCH';
+  PUT = 'PUT';
+  DELETE = 'DELETE';
+}

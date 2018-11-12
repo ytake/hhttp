@@ -7,16 +7,15 @@ use type Psr\Http\Message\UriInterface;
 use namespace Ytake\Hhttp\Exception;
 use namespace HH\Lib\{Str, C};
 use function preg_replace_callback;
-use function is_null;
 use function array_key_exists;
 use function rawurlencode;
 
 final class Uri implements UriInterface {
-  
+
   use UrlParseTrait;
 
   private ImmMap<string, int> $schemes = ImmMap{
-    'http' => 80, 
+    'http' => 80,
     'https' => 443
   };
 
@@ -43,9 +42,9 @@ final class Uri implements UriInterface {
   <<__Rx>>
   public function __toString(): string {
     return self::createUriString(
-      $this->scheme, 
-      $this->getAuthority(), 
-      $this->path, 
+      $this->scheme,
+      $this->getAuthority(),
+      $this->path,
       $this->query,
       $this->fragment
     );
@@ -80,17 +79,17 @@ final class Uri implements UriInterface {
   public function getHost(): string {
     return $this->host;
   }
-  
+
   <<__Rx>>
   public function getPort(): ?int {
     return $this->port;
   }
-  
+
   <<__Rx>>
   public function getPath(): string {
     return $this->path;
   }
-  
+
   <<__Rx>>
   public function getQuery(): string {
     return $this->query;
@@ -170,7 +169,7 @@ final class Uri implements UriInterface {
     $new->fragment = $fragment;
     return $new;
   }
-  
+
   private function extract(ParsedUrlShape $parts): void {
     $result = Shapes::idx($parts, 'scheme');
     if ($result is nonnull) {
@@ -202,7 +201,7 @@ final class Uri implements UriInterface {
       $this->userInfo .= ':'.$result;
     }
   }
-  
+
   <<__Rx>>
   private static function createUriString(
     string $scheme,
@@ -248,7 +247,7 @@ final class Uri implements UriInterface {
   private function filterScheme(string $scheme): string {
     return Str\lowercase($scheme);
   }
-  
+
   private function filterHost(string $host): string {
     return Str\lowercase($host);
   }
@@ -273,7 +272,7 @@ final class Uri implements UriInterface {
       $path
     );
   }
-  
+
   private function filterQueryAndFragment(string $str): string {
     return preg_replace_callback(
       '/(?:[^'. self::$charUnreserved . self::$charSubDelims . '%:@\/\?]++|%(?![A-Fa-f0-9]{2}))/',

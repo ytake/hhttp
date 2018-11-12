@@ -7,7 +7,7 @@ use function strval;
 use function Facebook\FBExpect\expect;
 
 final class UriTest extends HackTest {
-  
+
   const string RFC3986_BASE = 'http://a/b/c/d;p?q';
 
   public function testItShouldParseProvidedUri(): void {
