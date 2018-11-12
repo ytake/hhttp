@@ -15,7 +15,7 @@ trait RequestTrait {
 
   private ?string $method;
   private ?string $requestTarget;
-  private UriInterface $uri;
+  private ?UriInterface $uri;
   
   private  function initialize(
     mixed $uri = null,
@@ -26,14 +26,15 @@ trait RequestTrait {
     if ($method !== null) {
       $this->setMethod($method);
     }
-    $this->uri    = $this->createUri($uri);
+    $uri    = $this->createUri($uri);
     $this->stream = $this->getStream($body, 'wb+');
     $this->setHeaders($headers);
 
-    if (! $this->hasHeader('Host') && $this->uri->getHost()) {
+    if (! $this->hasHeader('Host') && $uri->getHost()) {
       $this->headerNames->add(Pair{'host', 'Host'});
       $this->headers->add(Pair{'Host', [$this->getHostFromUri()]});
     }
+    $this->uri = $uri;
   }
 
   private function createUri(mixed $uri) : UriInterface {
@@ -52,8 +53,12 @@ trait RequestTrait {
   }
 
   private function getHostFromUri() : string {
-    $host  = $this->uri->getHost();
-    $host .= $this->uri->getPort() ? ':' . $this->uri->getPort() : '';
+    $uri = $this->uri;
+    $host = '';
+    if ($uri is UriInterface) {
+      $host  = $uri->getHost();
+      $host .= $uri->getPort() ? ':' . $uri->getPort() : '';
+    }
     return $host;
   }
 
@@ -112,6 +117,7 @@ trait RequestTrait {
 
   <<__Rx>>
   public function getUri(): UriInterface {
+    invariant($this->uri is UriInterface, "type error.");
     return $this->uri;
   }
 
@@ -128,18 +134,22 @@ trait RequestTrait {
   }
 
   private function updateHostFromUri(): void {
-    if ('' === $host = $this->uri->getHost()) {
+    $uri = $this->uri;
+    invariant($uri is UriInterface, "type error.");
+    if ('' === $host = $uri->getHost()) {
       return;
     }
-    if (null !== ($port = $this->uri->getPort())) {
+    if (null !== ($port = $uri->getPort())) {
       $host .= ':'.$port;
     }
-    if ($this->headerNames->contains('host')) {
-      $header = $this->headerNames->at('host');
-    } else {
-      $header = 'Host';
+    if (!$this->headerNames->contains('host')) {
       $this->headerNames->add(Pair{'host', 'Host'});
     }
-    $this->headers = $this->headers->add(Pair{$header, [$host]});
+    $this->headers = $this->headers->add(
+      Pair{
+        $this->headerNames->at('host'), 
+        [$host]
+      }
+    );
   }
 }

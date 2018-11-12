@@ -2,9 +2,9 @@
 
 namespace Ytake\Hhttp;
 
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\StreamInterface;
-use Psr\Http\Message\UriInterface;
+use type Psr\Http\Message\RequestInterface;
+use type Psr\Http\Message\StreamInterface;
+use type Psr\Http\Message\UriInterface;
 
 class Request implements RequestInterface {
   use RequestTrait;
