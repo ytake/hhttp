@@ -6,7 +6,6 @@ use type Psr\Http\Message\UriInterface;
 use type Psr\Http\Message\RequestInterface;
 use namespace HH\Lib\Regex;
 
-
 trait RequestTrait {
 
   use MessageTrait;
