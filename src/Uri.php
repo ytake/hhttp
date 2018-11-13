@@ -132,7 +132,6 @@ final class Uri implements UriInterface {
     return $new;
   }
 
-  // ?int
   public function withPort($port): UriInterface {
     if ($this->port === $port = $this->filterPort($port)) {
       return $this;

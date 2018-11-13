@@ -71,7 +71,7 @@ final class AssertHeader {
   }
 
   public static function assertValidName(string $name): void {
-    if (! preg_match('/^[a-zA-Z0-9\'`#$%&*+.^_|~!-]+$/', $name)) {
+    if (!Regex\matches($name, re"/^[a-zA-Z0-9\'`#$%&*+.^_|~!-]+$/")) {
       throw new Exception\InvalidArgumentException(Str\format(
         '"%s" is not valid header name',
         $name

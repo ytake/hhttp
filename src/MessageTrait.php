@@ -3,7 +3,7 @@
 namespace Ytake\Hhttp;
 
 use type Psr\Http\Message\StreamInterface;
-use namespace HH\Lib\{Str};
+use namespace HH\Lib\{Str, Dict, Regex};
 
 use function array_map;
 use function array_values;
@@ -16,20 +16,27 @@ trait MessageTrait {
   private string $protocol = '1.1';
 
   private ?StreamInterface $stream;
+  
+  protected function extractHeaders(string $nh, string $header, varray<string> $value): void {
+    if ($this->headerNames->contains($nh)) {
+      $header = $this->headerNames[$nh];
+      $this->headers[$header] = \array_merge($this->headers[$header], $value);
+      return;
+    }
+    $this->headerNames[$nh] = $header;
+    $this->headers[$header] = $value;
+  }
 
   private function setHeaders(Map<string, varray<string>> $originalHeaders) : void {
     $headerNames = $headers = [];
     foreach ($originalHeaders as $header => $value) {
       $value = $this->filterHeaderValue($value);
       $this->assertHeader($header);
-      $headerNames[Str\lowercase($header)] = $header;
-      $headers[$header] = $value;
+      $this->extractHeaders(Str\lowercase($header), $header, $value);
     }
-    $this->headerNames = new Map($headerNames);
-    $this->headers = new Map($headers);
   }
-
-  private function getStream(mixed $stream, string $modeIfNotInstance) : StreamInterface {
+  
+  private function getStream(mixed $stream, string $mode = 'r') : StreamInterface {
     if ($stream is StreamInterface) {
       return $stream;
     }
@@ -40,7 +47,7 @@ trait MessageTrait {
         . 'or a Psr\Http\Message\StreamInterface implementation'
       );
     }
-    return new Stream($stream, $modeIfNotInstance);
+    return new Stream($stream, $mode);
   }
 
   private function assertHeader(string $name) : void {
@@ -48,7 +55,7 @@ trait MessageTrait {
   }
 
   private function filterHeaderValue(mixed $values): varray<string> {
-    if (! is_array($values)) {
+    if (!is_array($values)) {
       $values = [$values];
     }
     if ([] === $values) {
@@ -77,6 +84,7 @@ trait MessageTrait {
     return $new;
   }
 
+  <<__Rx>>
   public function getHeaders() {
     return $this->headers->toArray();
   }
@@ -131,7 +139,9 @@ trait MessageTrait {
   }
 
   public function getBody() {
-    invariant(($this->stream is nonnull), "resource error");
+    if(!$this->stream is nonnull) {
+      $this->stream = new Stream('');
+    }
     return $this->stream;
   }
 
@@ -144,23 +154,25 @@ trait MessageTrait {
     return $new;
   }
 
-  private function validateAndTrimHeader(string $header, mixed $values): array<string> {
-    if (1 !== \preg_match("@^[!#$%&'*+.^_`|~0-9A-Za-z-]+$@", $header)) {
-      throw new \InvalidArgumentException('Header name must be an RFC 7230 compatible string.');
+  private function validateAndTrimHeader(string $header, mixed $values): varray<string> {
+    if (!Regex\matches($header, re"@^[!#$%&'*+.^_`|~0-9A-Za-z-]+$@")) {
+      throw new Exception\InvalidArgumentException('Header name must be an RFC 7230 compatible string.');
     }
     if (!\is_array($values)) {
-      if ((!\is_numeric($values) && $values is string) || 1 !== \preg_match("@^[ \t\x21-\x7E\x80-\xFF]*$@", (string) $values)) {
+      if ((!\is_numeric($values) && $values is string) || !Regex\matches((string) $values, re"@^[ \t\x21-\x7E\x80-\xFF]*$@")) {
         throw new \InvalidArgumentException('Header values must be RFC 7230 compatible strings.');
       }
       return [Str\trim((string) $values, " \t")];
     }
     
     if (!$values is nonnull || $values === '') {
-      throw new \InvalidArgumentException('Header values must be a string or an array of strings, empty array given.');
+      throw new \InvalidArgumentException(
+        'Header values must be a string or an array of strings, empty array given.'
+      );
     }
     $returnValues = [];
     foreach ($values as $v) {
-      if ((!\is_numeric($v) && !$v is string) || 1 !== \preg_match("@^[ \t\x21-\x7E\x80-\xFF]*$@", (string) $v)) {
+      if ((!\is_numeric($v) && !$v is string) || !Regex\matches((string) $v, re"@^[ \t\x21-\x7E\x80-\xFF]*$@")) {
         throw new \InvalidArgumentException('Header values must be RFC 7230 compatible strings.');
       }
       $returnValues[] = Str\trim((string) $v, " \t");

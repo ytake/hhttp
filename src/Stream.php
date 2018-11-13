@@ -20,10 +20,14 @@ use function stream_get_meta_data;
 use function stream_get_contents;
 use function clearstatcache;
 use function var_export;
+use function set_error_handler;
+use function restore_error_handler;
+use function get_resource_type;
 
 use const SEEK_SET;
+use const E_WARNING;
 
-final class Stream implements StreamInterface {
+class Stream implements StreamInterface {
 
   private ?resource $stream;
   private bool $seekable = false;
@@ -47,11 +51,14 @@ final class Stream implements StreamInterface {
     },
   };
 
-  public function __construct(mixed $body, string $mode = 'rw+') {
+  public function __construct(mixed $body, string $mode = 'r') {
+    $this->setStream($body, $mode);
+  }
+
+  protected function setStream(mixed $body, string $mode = 'r') : void {
     if ($body is string) {
-      $resource = fopen($body, $mode);
+      $resource = fopen('php://temp', 'rw+');
       fwrite($resource, $body);
-      rewind($resource);
       $body = $resource;
     }
     if ($body is resource) {

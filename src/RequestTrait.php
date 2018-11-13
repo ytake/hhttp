@@ -4,7 +4,7 @@ namespace Ytake\Hhttp;
 
 use type Psr\Http\Message\UriInterface;
 use type Psr\Http\Message\RequestInterface;
-use namespace HH\Lib\Str;
+use namespace HH\Lib\{Str, Regex};
 
 use function preg_match;
 
@@ -77,7 +77,7 @@ trait RequestTrait {
   }
 
   public function withRequestTarget($requestTarget) {
-    if (preg_match('#\s#', $requestTarget)) {
+    if (Regex\matches($requestTarget, re"#\s#")) {
       throw new \InvalidArgumentException('Invalid request target provided; cannot contain whitespace');
     }
     $new = clone $this;
@@ -91,9 +91,8 @@ trait RequestTrait {
   }
 
   public function withMethod($method) {
-    $method = HttpMethod::assert($method);
     $new = clone $this;
-    $new->method = $method;
+    $new->method = HttpMethod::assert($method);
     return $new;
   }
 

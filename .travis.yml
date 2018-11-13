@@ -4,10 +4,8 @@ services:
  - docker
 env:
   matrix:
-   - HHVM_VERSION=3.28.0
-   - HHVM_VERSION=3.28.1
-   - HHVM_VERSION=3.28.2
-   - HHVM_VERSION=3.28.3
+   - HHVM_VERSION=3.29.0
+   - HHVM_VERSION=3.29.1
    - HHVM_VERSION=latest
    - HHVM_VERSION=nightly
 install:

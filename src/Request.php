@@ -4,7 +4,7 @@ namespace Ytake\Hhttp;
 
 use type Psr\Http\Message\UriInterface;
 use type Psr\Http\Message\RequestInterface;
-use namespace HH\Lib\{Str};
+use namespace HH\Lib\Str;
 
 class Request implements RequestInterface {
   use RequestTrait;
@@ -13,33 +13,23 @@ class Request implements RequestInterface {
     mixed $uri = null,
     HttpMethod $method = HttpMethod::GET,
     mixed $body = 'php://temp',
-    Map<string, varray<string>> $headers = Map{}
+    Map<string, varray<string>> $headers = Map{},
+    string $version = '1.1'
   ) {
-    $this->initialize($uri, $method, $body, $headers);
-  }
-
-  <<__Override>>
-  public function getHeaders() {
-    $headers = $this->headers;
-    $uri = $this->uri;
-    invariant($uri is UriInterface, 'uri error.');
-    if (!$this->hasHeader('host') && $uri->getHost() is string) {
-      $headers->add(Pair{'Host', [$this->getHostFromUri()]});
+    if ($uri is string) {
+      $uri = new Uri($uri);
     }
-    return $headers;
-  }
+    $this->method = $method;
+    invariant($uri is UriInterface, "\$uri, not implements UriInterface");
+    $this->uri = $uri;
+    $this->setHeaders($headers);
+    $this->protocol = $version;
 
-  <<__Override>>
-  public function getHeader($header) {
-    $uri = $this->uri;
-    invariant($uri is UriInterface, 'uri error.');
-    if (! $this->hasHeader($header)) {
-      if (Str\lowercase($header) === 'host' && $uri->getHost()) {
-        return [$this->getHostFromUri()];
-      }
-      return [];
+    if (!$this->hasHeader('Host')) {
+      $this->updateHostFromUri();
     }
-    $header = $this->headerNames[Str\lowercase($header)];
-    return $this->headers->at($header);
+    if ('' !== $body && null !== $body) {
+      $this->stream = $this->getStream($body);
+    }
   }
 }
