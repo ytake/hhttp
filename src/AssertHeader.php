@@ -6,7 +6,6 @@ use namespace HH\Lib\{Str, Regex};
 
 use function ord;
 use function in_array;
-use function preg_match;
 use function gettype;
 use function get_class;
 use function strval;

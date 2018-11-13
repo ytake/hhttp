@@ -1,9 +1,9 @@
-<?hh 
+<?hh
 
 namespace Ytake\Hhttp;
 
 use type Psr\Http\Message\StreamInterface;
-use namespace HH\Lib\{Str, Dict, Regex};
+use namespace HH\Lib\{Str, Regex};
 
 use function array_map;
 use function array_values;
@@ -16,7 +16,7 @@ trait MessageTrait {
   private string $protocol = '1.1';
 
   private ?StreamInterface $stream;
-  
+
   protected function extractHeaders(string $nh, string $header, varray<string> $value): void {
     if ($this->headerNames->contains($nh)) {
       $header = $this->headerNames[$nh];
@@ -35,7 +35,7 @@ trait MessageTrait {
       $this->extractHeaders(Str\lowercase($header), $header, $value);
     }
   }
-  
+
   private function getStream(mixed $stream, string $mode = 'r') : StreamInterface {
     if ($stream is StreamInterface) {
       return $stream;
@@ -164,7 +164,7 @@ trait MessageTrait {
       }
       return [Str\trim((string) $values, " \t")];
     }
-    
+
     if (!$values is nonnull || $values === '') {
       throw new \InvalidArgumentException(
         'Header values must be a string or an array of strings, empty array given.'

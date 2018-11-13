@@ -1,4 +1,4 @@
-<?hh // strict 
+<?hh // strict
 
 use type Ytake\Hhttp\Uri;
 use type Ytake\Hhttp\Request;
@@ -20,7 +20,7 @@ final class RequestTest extends HackTest {
     $r = new Request($uri);
     expect($r->getUri())->toBeSame($uri);
   }
-  
+
   <<ExpectedException(\InvalidArgumentException::class), ExpectedExceptionMessage('Unable to parse URI: ///')>>
   public function testValidateRequestUri(): void {
     new Request('///');
@@ -100,9 +100,9 @@ final class RequestTest extends HackTest {
 
   public function testCanGetHeaderAsCsv(): void {
     $r = new Request(
-      'http://foo.com/baz?bar=bam', 
-      HttpMethod::GET, 
-      'php://temp', 
+      'http://foo.com/baz?bar=bam',
+      HttpMethod::GET,
+      'php://temp',
       Map{
         'Foo' => varray['a', 'b', 'c'],
       }

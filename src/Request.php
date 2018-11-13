@@ -4,7 +4,6 @@ namespace Ytake\Hhttp;
 
 use type Psr\Http\Message\UriInterface;
 use type Psr\Http\Message\RequestInterface;
-use namespace HH\Lib\Str;
 
 class Request implements RequestInterface {
   use RequestTrait;

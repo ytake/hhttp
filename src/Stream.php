@@ -13,16 +13,12 @@ use function fstat;
 use function fclose;
 use function fread;
 use function fwrite;
-use function rewind;
 use function is_resource;
 use function array_key_exists;
 use function stream_get_meta_data;
 use function stream_get_contents;
 use function clearstatcache;
 use function var_export;
-use function set_error_handler;
-use function restore_error_handler;
-use function get_resource_type;
 
 use const SEEK_SET;
 use const E_WARNING;
@@ -55,7 +51,7 @@ class Stream implements StreamInterface {
     $this->setStream($body, $mode);
   }
 
-  protected function setStream(mixed $body, string $mode = 'r') : void {
+  protected function setStream(mixed $body, string $_mode = 'r') : void {
     if ($body is string) {
       $resource = fopen('php://temp', 'rw+');
       fwrite($resource, $body);

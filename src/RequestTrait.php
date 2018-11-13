@@ -4,9 +4,8 @@ namespace Ytake\Hhttp;
 
 use type Psr\Http\Message\UriInterface;
 use type Psr\Http\Message\RequestInterface;
-use namespace HH\Lib\{Str, Regex};
+use namespace HH\Lib\Regex;
 
-use function preg_match;
 
 trait RequestTrait {
 
