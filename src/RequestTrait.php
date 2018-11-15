@@ -2,8 +2,8 @@
 
 namespace Ytake\Hhttp;
 
-use type Psr\Http\Message\UriInterface;
-use type Psr\Http\Message\RequestInterface;
+use type Facebook\Experimental\Http\Message\UriInterface;
+use type Facebook\Experimental\Http\Message\RequestInterface;
 use namespace HH\Lib\Regex;
 
 trait RequestTrait {

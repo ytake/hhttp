@@ -14,13 +14,13 @@ final class UriTest extends HackTest {
     $uri = new Uri('https://user:pass@example.com:8080/path/123?q=abc#test');
     expect($uri->getScheme())->toBeSame('https');
     expect($uri->getAuthority())->toBeSame('user:pass@example.com:8080');
-    expect($uri->getUserInfo())->toBeSame('user:pass');
+    expect($uri->getUserInfo())->toBeSame(shape('user' => 'user', 'pass' => 'pass'));
     expect($uri->getHost())->toBeSame('example.com');
     expect($uri->getPort())->toBeSame(8080);
     expect($uri->getPath())->toBeSame('/path/123');
-    expect($uri->getQuery())->toBeSame('q=abc');
+    expect($uri->getRawQuery())->toBeSame('q=abc');
     expect($uri->getFragment())->toBeSame('test');
-    expect(strval($uri))->toBeSame('https://user:pass@example.com:8080/path/123?q=abc#test');
+    expect($uri->toString())->toBeSame('https://user:pass@example.com:8080/path/123?q=abc#test');
   }
 
   public function testItCanTransformAndRetrievePartsIndividually(): void {
@@ -30,17 +30,17 @@ final class UriTest extends HackTest {
       ->withHost('example.com')
       ->withPort(8080)
       ->withPath('/path/123')
-      ->withQuery('q=abc')
+      ->withRawQuery('q=abc')
       ->withFragment('test');
     expect($uri->getScheme())->toBeSame('https');
     expect($uri->getAuthority())->toBeSame('user:pass@example.com:8080');
-    expect($uri->getUserInfo())->toBeSame('user:pass');
+    expect($uri->getUserInfo())->toBeSame(shape('user' => 'user', 'pass' => 'pass'));
     expect($uri->getHost())->toBeSame('example.com');
     expect($uri->getPort())->toBeSame(8080);
     expect($uri->getPath())->toBeSame('/path/123');
-    expect($uri->getQuery())->toBeSame('q=abc');
+    expect($uri->getRawQuery())->toBeSame('q=abc');
     expect($uri->getFragment())->toBeSame('test');
-    expect(strval($uri))->toBeSame('https://user:pass@example.com:8080/path/123?q=abc#test');
+    expect($uri->toString())->toBeSame('https://user:pass@example.com:8080/path/123?q=abc#test');
   }
 
   public function vecUris(): vec<(string)> {
@@ -56,8 +56,8 @@ final class UriTest extends HackTest {
       tuple(''),
       tuple('//example.org'),
       tuple('//example.org/'),
-      tuple('//example.org?q#h'),
-      tuple('?q'),
+      tuple('//example.org?q=#h'),
+      tuple('?q='),
       tuple('?q=abc&foo=bar'),
       tuple('#fragment'),
       tuple('./foo/../bar'),

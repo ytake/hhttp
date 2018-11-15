@@ -2,7 +2,7 @@
 
 namespace Ytake\Hhttp;
 
-use type Psr\Http\Message\ResponseInterface;
+use type Facebook\Experimental\Http\Message\ResponseInterface;
 
 class Response implements ResponseInterface {
   use MessageTrait;

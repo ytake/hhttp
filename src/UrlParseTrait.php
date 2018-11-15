@@ -2,7 +2,7 @@
 
 namespace Ytake\Hhttp;
 
-use type Psr\Http\Message\UriInterface;
+use type Facebook\Experimental\Http\Message\UriInterface;
 use function parse_url;
 
 trait UrlParseTrait {

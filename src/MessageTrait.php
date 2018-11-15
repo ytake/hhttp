@@ -2,7 +2,7 @@
 
 namespace Ytake\Hhttp;
 
-use type Psr\Http\Message\StreamInterface;
+use type Facebook\Experimental\Http\Message\StreamInterface;
 use namespace HH\Lib\{Str, Regex};
 
 use function array_map;
@@ -14,8 +14,6 @@ trait MessageTrait {
   private Map<string, string> $headerNames = Map{};
 
   private string $protocol = '1.1';
-
-  private ?StreamInterface $stream;
 
   protected function extractHeaders(string $nh, string $header, varray<string> $value): void {
     if ($this->headerNames->contains($nh)) {
