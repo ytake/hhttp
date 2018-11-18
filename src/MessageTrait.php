@@ -1,81 +1,59 @@
-<?hh
+<?hh // strict
 
 namespace Ytake\Hhttp;
 
-use type Psr\Http\Message\StreamInterface;
-use namespace HH\Lib\{Str, Regex};
+use namespace HH\Lib\{Str, Regex, Vec, C};
 
-use function array_map;
-use function array_values;
 
 trait MessageTrait {
 
-  private Map<string, varray<string>> $headers = Map{};
+  private dict<string, vec<string>> $headers = dict[];
   private Map<string, string> $headerNames = Map{};
 
   private string $protocol = '1.1';
 
-  private ?StreamInterface $stream;
-
-  protected function extractHeaders(string $nh, string $header, varray<string> $value): void {
+  protected function extractHeaders(string $header, vec<string> $value): void {
+    $nh = Str\lowercase($header);
     if ($this->headerNames->contains($nh)) {
       $header = $this->headerNames[$nh];
-      $this->headers[$header] = \array_merge($this->headers[$header], $value);
+      $this->headers[$header] =  Vec\concat($this->headers[$header], $value);
       return;
     }
     $this->headerNames[$nh] = $header;
     $this->headers[$header] = $value;
   }
 
-  private function setHeaders(Map<string, varray<string>> $originalHeaders) : void {
-    $headerNames = $headers = [];
+  private function setHeaders(Map<string, vec<string>> $originalHeaders) : void {
     foreach ($originalHeaders as $header => $value) {
-      $value = $this->filterHeaderValue($value);
       $this->assertHeader($header);
-      $this->extractHeaders(Str\lowercase($header), $header, $value);
-    }
-  }
-
-  private function getStream(mixed $stream, string $mode = 'r') : StreamInterface {
-    if ($stream is StreamInterface) {
-      return $stream;
-    }
-    if (!$stream is string && !$stream is resource) {
-      throw new Exception\InvalidArgumentException(
-        'Stream must be a string stream resource identifier, '
-        . 'an actual stream resource, '
-        . 'or a Psr\Http\Message\StreamInterface implementation'
+      $this->extractHeaders(
+        $header,
+        $this->filterHeaderValue($this->validateAndTrimHeader($header, $value))
       );
     }
-    return new Stream($stream, $mode);
   }
 
   private function assertHeader(string $name) : void {
     AssertHeader::assertValidName($name);
   }
 
-  private function filterHeaderValue(mixed $values): varray<string> {
-    if (!is_array($values)) {
-      $values = [$values];
-    }
-    if ([] === $values) {
+  private function filterHeaderValue(vec<string> $values): vec<string> {
+    if (!C\count($values)) {
       throw new Exception\InvalidArgumentException(
-        'Invalid header value: must be a string or array of strings; '
-        . 'cannot be an empty array'
+        'Invalid header value: must be a vec<string>; cannot be an empty vec[]'
       );
     }
-    return array_map(($value) ==> {
-      AssertHeader::assertValid($value);
-      return (string) $value;
-    }, array_values($values));
+    return Vec\map($values, ($t) ==> {
+      AssertHeader::assertValid($t);
+      return Str\trim($t, " \t");
+    });
   }
 
-  <<__Rx>>
-  public function getProtocolVersion() {
+  public function getProtocolVersion(): string {
     return $this->protocol;
   }
 
-  public function withProtocolVersion($version) {
+  public function withProtocolVersion(string $version): this {
     if ($this->protocol === $version) {
       return $this;
     }
@@ -84,41 +62,43 @@ trait MessageTrait {
     return $new;
   }
 
-  <<__Rx>>
-  public function getHeaders() {
-    return $this->headers->toArray();
+  public function getHeaders(): dict<string, vec<string>> {
+    return $this->headers;
   }
 
-  public function hasHeader($header) {
+  public function hasHeader(string $header): bool {
     return $this->headerNames->contains(Str\lowercase($header));
   }
 
-  public function getHeader($header) {
-    $header = Str\lowercase($header);
-    if (!$this->headerNames->contains($header)) {
-      return [];
+  public function getHeader(string $header): vec<string> {
+    $lowHeader = Str\lowercase($header);
+    if (!$this->headerNames->contains($lowHeader)) {
+      return vec[];
     }
-    return $this->headers->at($this->headerNames->at($header));
+    return $this->headers[$this->headerNames->at($lowHeader)];
   }
 
-  public function getHeaderLine($header) {
+  public function getHeaderLine(string $header): string {
     return Str\join($this->getHeader($header), ', ');
   }
 
-  public function withHeader($header, $value) {
-    $value = $this->validateAndTrimHeader($header, $value);
+  public function withHeader(string $header, vec<string> $value): this {
     $normalized = Str\lowercase($header);
     $new = clone $this;
     if ($this->headerNames->contains($normalized)) {
-      $new->headers->remove($this->headerNames->at($normalized));
+      \unset($new->headers[$this->headerNames->at($normalized)]);
     }
     $new->headerNames->add(Pair{$normalized, $header});
-    $new->headers->add(Pair{$header, $value});
+    $new->headers[$header] = $this->filterHeaderValue($this->validateAndTrimHeader($header, $value));
     return $new;
   }
 
-  public function withAddedHeader($name, $value) {
-    if (!$name is string || '' === $name) {
+  public function withHeaderLine(string $name, string $value): this {
+    return $this->withHeader($name, Str\split($value, ','));
+  }
+
+  public function withAddedHeader(string $name, vec<string> $value): this {
+    if ('' === $name) {
       throw new \InvalidArgumentException('Header name must be an RFC 7230 compatible string.');
     }
     $new = clone $this;
@@ -126,57 +106,31 @@ trait MessageTrait {
     return $new;
   }
 
-  public function withoutHeader($header) {
+  public function withAddedHeaderLine(string $name, string $value): this {
+    return $this->withAddedHeader($name, Str\split($value, ','));
+  }
+
+  public function withoutHeader(string $header): this {
     $normalized = Str\lowercase($header);
     if (!$this->headerNames->contains($normalized)) {
       return $this;
     }
     $header = $this->headerNames->at($normalized);
     $new = clone $this;
-    $new->headers->remove($header);
+    \unset($new->headers[$header]);
     $new->headerNames->remove($normalized);
     return $new;
   }
 
-  public function getBody() {
-    if(!$this->stream is nonnull) {
-      $this->stream = new Stream('');
-    }
-    return $this->stream;
-  }
-
-  public function withBody(StreamInterface $body) {
-    if ($body === $this->stream) {
-      return $this;
-    }
-    $new = clone $this;
-    $new->stream = $body;
-    return $new;
-  }
-
-  private function validateAndTrimHeader(string $header, mixed $values): varray<string> {
+  private function validateAndTrimHeader(string $header, vec<string> $values): vec<string> {
     if (!Regex\matches($header, re"@^[!#$%&'*+.^_`|~0-9A-Za-z-]+$@")) {
       throw new Exception\InvalidArgumentException('Header name must be an RFC 7230 compatible string.');
     }
-    if (!\is_array($values)) {
-      if ((!\is_numeric($values) && $values is string) || !Regex\matches((string) $values, re"@^[ \t\x21-\x7E\x80-\xFF]*$@")) {
-        throw new \InvalidArgumentException('Header values must be RFC 7230 compatible strings.');
+    return Vec\map($values, ($r) ==> {
+      if (!Regex\matches($r, re"@^[ \t\x21-\x7E\x80-\xFF]*$@")) {
+        throw new \InvalidArgumentException('Header values must be RFC 7230 compatible string.');
       }
-      return [Str\trim((string) $values, " \t")];
-    }
-
-    if (!$values is nonnull || $values === '') {
-      throw new \InvalidArgumentException(
-        'Header values must be a string or an array of strings, empty array given.'
-      );
-    }
-    $returnValues = [];
-    foreach ($values as $v) {
-      if ((!\is_numeric($v) && !$v is string) || !Regex\matches((string) $v, re"@^[ \t\x21-\x7E\x80-\xFF]*$@")) {
-        throw new \InvalidArgumentException('Header values must be RFC 7230 compatible strings.');
-      }
-      $returnValues[] = Str\trim((string) $v, " \t");
-    }
-    return $returnValues;
+      return Str\trim($r, " \t");
+    });
   }
 }

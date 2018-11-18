@@ -1,14 +1,15 @@
-<?hh
+<?hh // strict
 
 namespace Ytake\Hhttp;
 
-use type Psr\Http\Message\UriInterface;
+use type Facebook\Experimental\Http\Message\UriInterface;
 
 use namespace Ytake\Hhttp\Exception;
-use namespace HH\Lib\{Str, C};
+use namespace HH\Lib\{Str, C, Dict};
 use function preg_replace_callback;
 use function array_key_exists;
 use function rawurlencode;
+use function parse_str;
 
 final class Uri implements UriInterface {
 
@@ -22,11 +23,13 @@ final class Uri implements UriInterface {
   private static string $charUnreserved = 'a-zA-Z0-9_\-\.~';
   private static string $charSubDelims = '!\$&\'\(\)\*\+,;=';
   private string $scheme = '';
-  private string $userInfo = '';
+  private string $user = '';
+  private string $password = '';
   private string $host = '';
   private ?int $port = null;
   private string $path = '';
-  private string $query = '';
+  private string $rawQuery = '';
+  private dict<string, string> $query = dict[];
   private string $fragment = '';
 
   public function __construct(string $uri = '') {
@@ -39,12 +42,16 @@ final class Uri implements UriInterface {
     }
   }
 
-  <<__Rx>>
   public function __toString(): string {
+    return $this->toString();
+  }
+
+  public function toString(): string {
     return self::createUriString(
       $this->scheme,
       $this->getAuthority(),
       $this->path,
+      $this->rawQuery,
       $this->query,
       $this->fragment
     );
@@ -61,8 +68,13 @@ final class Uri implements UriInterface {
       return '';
     }
     $authority = $this->host;
-    if ('' !== $this->userInfo) {
-      $authority = $this->userInfo.'@'.$authority;
+    $userInfo = '';
+    if ($this->user !== '') {
+      $userInfo = $this->user;
+      if ($this->password !== '') {
+        $userInfo .= Str\format(':%s', $this->password);
+      }
+      $authority = Str\format('%s@%s', $userInfo, $authority);
     }
     if ($this->port is nonnull) {
       $authority .= ':'.$this->port;
@@ -71,8 +83,11 @@ final class Uri implements UriInterface {
   }
 
   <<__Rx>>
-  public function getUserInfo(): string{
-    return $this->userInfo;
+  public function getUserInfo(): shape('user' => string, 'pass' => string) {
+    return shape(
+      'user' => $this->user,
+      'pass' => $this->password,
+    );
   }
 
   <<__Rx>>
@@ -91,8 +106,13 @@ final class Uri implements UriInterface {
   }
 
   <<__Rx>>
-  public function getQuery(): string {
+  public function getQuery(): dict<string, string> {
     return $this->query;
+  }
+
+  <<__Rx>>
+  public function getRawQuery(): string {
+    return $this->rawQuery;
   }
 
   <<__Rx>>
@@ -100,7 +120,7 @@ final class Uri implements UriInterface {
     return $this->fragment;
   }
 
-  public function withScheme($scheme): UriInterface {
+  public function withScheme(string $scheme): this {
     if ($this->scheme === $scheme = $this->filterScheme($scheme)) {
       return $this;
     }
@@ -110,20 +130,17 @@ final class Uri implements UriInterface {
     return $new;
   }
 
-  public function withUserInfo($user, $password = null): UriInterface {
-    $info = $user;
-    if ($password is nonnull && '' !== $password) {
-      $info .= ':'.$password;
-    }
-    if ($this->userInfo === $info) {
+  public function withUserInfo(string $user, string $password): this {
+    if ($this->user === $user && $this->password === $password) {
       return $this;
     }
     $new = clone $this;
-    $new->userInfo = $info;
+    $new->user = $user;
+    $new->password = $password;
     return $new;
   }
 
-  public function withHost($host): UriInterface {
+  public function withHost(string $host): this {
     if ($this->host === $host = $this->filterHost($host)) {
       return $this;
     }
@@ -132,7 +149,7 @@ final class Uri implements UriInterface {
     return $new;
   }
 
-  public function withPort($port): UriInterface {
+  public function withPort(?int $port = null): this {
     if ($this->port === $port = $this->filterPort($port)) {
       return $this;
     }
@@ -141,7 +158,7 @@ final class Uri implements UriInterface {
     return $new;
   }
 
-  public function withPath($path): UriInterface {
+  public function withPath(string $path): this {
     if ($this->path === $path = $this->filterPath($path)) {
       return $this;
     }
@@ -150,17 +167,26 @@ final class Uri implements UriInterface {
     return $new;
   }
 
-
-  public function withQuery($query): UriInterface {
-    if ($this->query === $query = $this->filterQueryAndFragment($query)) {
+  public function withQuery(dict<string, string> $query): this {
+    if ($this->query === $query) {
       return $this;
     }
     $new = clone $this;
     $new->query = $query;
+
     return $new;
   }
 
-  public function withFragment($fragment): UriInterface {
+  public function withRawQuery(string $query): this {
+    if ($this->query === $query = $this->filterQueryAndFragment($query)) {
+      return $this;
+    }
+    $new = clone $this;
+    $new->rawQuery = $query;
+    return $new;
+  }
+
+  public function withFragment(string $fragment): this {
     if ($this->fragment === $fragment = $this->filterQueryAndFragment($fragment)) {
       return $this;
     }
@@ -174,7 +200,7 @@ final class Uri implements UriInterface {
     if ($result is nonnull) {
       $this->scheme = $this->filterScheme($result);
     }
-    $this->userInfo = Shapes::idx($parts, 'user', '');
+    $this->user = Shapes::idx($parts, 'user', '');
     $result = Shapes::idx($parts, 'host', '');
     if ($result is nonnull) {
       $this->host = $this->filterHost($result);
@@ -189,24 +215,24 @@ final class Uri implements UriInterface {
     }
     $result = Shapes::idx($parts, 'query');
     if ($result is nonnull) {
-      $this->query = $this->filterQueryAndFragment($result);
+      $this->rawQuery = $this->filterQueryAndFragment($result);
     }
     $result = Shapes::idx($parts, 'fragment');
     if ($result is nonnull) {
       $this->fragment = $this->filterQueryAndFragment($result);
     }
-    $result = Shapes::idx($parts, 'pass');
-    if(!Str\is_empty($result)) {
-      $this->userInfo .= ':'.$result;
-    }
+    $this->password = Shapes::idx($parts, 'pass', '');
+    $out = [];
+    parse_str($this->rawQuery, &$out);
+    $this->query = dict($out);
   }
 
-  <<__Rx>>
   private static function createUriString(
     string $scheme,
     string $authority,
     string $path,
-    string $query,
+    string $rawQuery,
+    dict<string, string> $query,
     string $fragment
   ): string {
     $uri = '';
@@ -229,8 +255,12 @@ final class Uri implements UriInterface {
       }
       $uri .= $path;
     }
-    if ('' !== $query) {
-      $uri .= '?'.$query;
+    $out = [];
+    $mergeQuery = dict[];
+    parse_str($rawQuery, &$out);
+    $mergeQuery = Dict\merge($query, dict($out));
+    if(C\count($mergeQuery)) {
+      $uri .= '?'. \http_build_query($mergeQuery);
     }
     if ('' !== $fragment) {
       $uri .= '#'.$fragment;

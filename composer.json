@@ -14,16 +14,19 @@
       "email": "yuuki.takezawa@comnect.jp.net"
     }
   ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/facebookexperimental/hack-http-request-response-interfaces.git"
+    }
+  ],
   "require": {
     "hhvm": ">=3.29",
-    "psr/http-server-middleware": "^1.0",
-    "psr/http-server-handler": "^1.0",
-    "psr/http-message": "^1.0",
-    "psr/http-factory": "^1.0",
     "psr/container": "^1.0",
-    "hack-psr/psr7-http-message-hhi": "^1.0.0",
-    "ytake/psr-http-handlers-hhi": "^1.1.0",
-    "hhvm/hsl-experimental": "^3.29"
+    "usox/hack-http-factory-interfaces": "0.1.0",
+    "hhvm/hsl-experimental": "^3.29",
+    "facebook/hack-http-request-response-interfaces": "dev-master",
+    "ytake/hack-http-server-request-handlers-interfaces": "^1.0.0"
   },
   "require-dev": {
     "hhvm/hacktest": "^1.0",

@@ -1,37 +1,22 @@
-<?hh
+<?hh // strict
 
 namespace Ytake\Hhttp;
 
-use type Psr\Http\Message\UriInterface;
-use type Psr\Http\Message\RequestInterface;
+use type Facebook\Experimental\Http\Message\UriInterface;
+use type Facebook\Experimental\Http\Message\RequestInterface;
+use type Facebook\Experimental\Http\Message\RequestURIOptions;
+
+use namespace HH\Lib\Experimental\IO;
+use namespace Facebook\Experimental\Http\Message;
 use namespace HH\Lib\Regex;
 
-
 trait RequestTrait {
-
-  use MessageTrait;
+  use MessageTrait, IOTrait;
   require implements RequestInterface;
 
-  private ?HttpMethod $method;
+  private Message\HTTPMethod $method;
   private ?string $requestTarget;
-  private ?UriInterface $uri;
-
-  private  function initialize(
-    mixed $uri = null,
-    HttpMethod $method = HttpMethod::GET,
-    mixed $body = 'php://memory',
-    Map<string, varray<string>> $headers = Map{}
-  ): void {
-    $this->method = $method;
-    $uri = $this->createUri($uri);
-    $this->stream = $this->getStream($body, 'wb+');
-    $this->setHeaders($headers);
-    if (!$this->hasHeader('Host') && $uri->getHost()) {
-      $this->headerNames->add(Pair{'host', 'Host'});
-      $this->headers->add(Pair{'Host', [$this->getHostFromUri()]});
-    }
-    $this->uri = $uri;
-  }
+  private UriInterface $uri;
 
   private function createUri(mixed $uri): UriInterface {
     if ($uri is UriInterface) {
@@ -53,12 +38,12 @@ trait RequestTrait {
     $host = '';
     if ($uri is UriInterface) {
       $host  = $uri->getHost();
-      $host .= $uri->getPort() ? ':' . $uri->getPort() : '';
+      $host .= ($uri->getPort() is nonnull) ? ':' . $uri->getPort() : '';
     }
     return $host;
   }
 
-  public function getRequestTarget() {
+  public function getRequestTarget(): string {
     if ($this->requestTarget is nonnull) {
       return $this->requestTarget;
     }
@@ -68,14 +53,14 @@ trait RequestTrait {
       if ('' === $target = $uri->getPath()) {
         $target = '/';
       }
-      if ('' !== $uri->getQuery()) {
-        $target .= '?'.$uri->getQuery();
+      if ('' !== $uri->getRawQuery()) {
+        $target .= '?'. $uri->getRawQuery();
       }
     }
     return $target;
   }
 
-  public function withRequestTarget($requestTarget) {
+  public function withRequestTarget(string $requestTarget): this {
     if (Regex\matches($requestTarget, re"#\s#")) {
       throw new \InvalidArgumentException('Invalid request target provided; cannot contain whitespace');
     }
@@ -85,29 +70,32 @@ trait RequestTrait {
   }
 
   <<__Rx>>
-  public function getMethod() {
+  public function getMethod():  Message\HTTPMethod {
     return $this->method;
   }
 
-  public function withMethod($method) {
+  public function withMethod(Message\HTTPMethod $method): this {
     $new = clone $this;
-    $new->method = HttpMethod::assert($method);
+    $new->method = Message\HTTPMethod::assert($method);
     return $new;
   }
 
   <<__Rx>>
-  public function getUri() {
+  public function getUri(): UriInterface {
     invariant($this->uri is UriInterface, "type error.");
     return $this->uri;
   }
 
-  public function withUri(UriInterface $uri, $preserveHost = false) {
+  public function withUri(
+    UriInterface $uri,
+    RequestURIOptions $options = shape('preserveHost' => false)
+  ): this {
     if ($uri === $this->uri) {
       return $this;
     }
     $new = clone $this;
     $new->uri = $uri;
-    if (!$preserveHost || !$this->hasHeader('Host')) {
+    if ($options['preserveHost'] === false || !$this->hasHeader('Host')) {
       $new->updateHostFromUri();
     }
     return $new;
@@ -125,11 +113,18 @@ trait RequestTrait {
     if (!$this->headerNames->contains('host')) {
       $this->headerNames->add(Pair{'host', 'Host'});
     }
-    $this->headers = $this->headers->add(
-      Pair{
-        $this->headerNames->at('host'),
-        [$host]
-      }
-    );
+    $this->headers[$this->headerNames->at('host')] = vec[$host];
+  }
+
+  public function getBody(): IO\ReadHandle {
+    $rh = $this->readHandle;
+    invariant($rh is IO\ReadHandle, "handle error.");
+    return $rh;
+  }
+
+  public function withBody(IO\ReadHandle $body): this {
+    $new = clone $this;
+    $new->readHandle = $body;
+    return $new;
   }
 }
