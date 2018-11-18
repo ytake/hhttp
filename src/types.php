@@ -13,16 +13,7 @@ type ParsedUrlShape = shape(
   ?'fragment' => string
 );
 
-enum HttpMethod : string {
-  HEAD = 'HEAD';
-  GET = 'GET';
-  POST = 'POST';
-  PATCH = 'PATCH';
-  PUT = 'PUT';
-  DELETE = 'DELETE';
-}
-
-enum StatusCode : int {
+enum StatusCode : int as int {
   Continue = 100;
   SwitchingProtocols = 101;
   Processing = 102; //RFC2518

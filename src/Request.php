@@ -1,18 +1,19 @@
-<?hh
+<?hh // strict
 
 namespace Ytake\Hhttp;
 
 use type Facebook\Experimental\Http\Message\UriInterface;
 use type Facebook\Experimental\Http\Message\RequestInterface;
+use namespace Facebook\Experimental\Http\Message;
 
 class Request implements RequestInterface {
   use RequestTrait;
 
   public function __construct(
-    mixed $uri = null,
-    HttpMethod $method = HttpMethod::GET,
-    mixed $body = 'php://temp',
-    Map<string, varray<string>> $headers = Map{},
+    mixed $uri,
+    Message\HTTPMethod $method = Message\HTTPMethod::GET,
+    string $body = '',
+    Map<string, vec<string>> $headers = Map{},
     string $version = '1.1'
   ) {
     if ($uri is string) {
@@ -27,8 +28,7 @@ class Request implements RequestInterface {
     if (!$this->hasHeader('Host')) {
       $this->updateHostFromUri();
     }
-    if ('' !== $body && null !== $body) {
-      $this->stream = $this->getStream($body);
-    }
+    $this->createIO();
+    $this->setBody($body);
   }
 }

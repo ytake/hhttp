@@ -1,11 +1,13 @@
-<?hh
+<?hh // strict
 
 namespace Ytake\Hhttp;
 
 use type Facebook\Experimental\Http\Message\ResponseInterface;
 
+use namespace HH\Lib\Experimental\IO;
+
 class Response implements ResponseInterface {
-  use MessageTrait;
+  use MessageTrait, IOTrait;
 
   private ImmMap<StatusCode, string> $phrases = ImmMap{
     StatusCode::Continue => 'Continue',
@@ -72,34 +74,31 @@ class Response implements ResponseInterface {
     StatusCode::NetworkAuthenticationRequired => 'Network Authentication Required',
   };
 
-  private ?string $reason = '';
-
   public function __construct(
     private StatusCode $status = StatusCode::Ok,
-    Map<string, varray<string>> $headers = Map{},
-    mixed $body = null,
+    Map<string, vec<string>> $headers = Map{},
+    string $body = '',
     private string $protocol = '1.1',
-    ?string $reason = null
+    protected string $reason = ''
   ) {
-    if ('' !== $body && null !== $body) {
-      $this->stream = $this->getStream($body);
-    }
     $this->setHeaders($headers);
+    $this->createIO();
+    $this->getBody()->rawWriteBlocking($body);
     $this->reason = $reason;
-    if (null === $reason && $this->phrases->contains($status)) {
+    if ($this->phrases->contains($status)) {
       $this->reason = $this->phrases->at($status);
     }
   }
 
-  public function getStatusCode() {
+  public function getStatusCode(): int {
     return $this->status;
   }
 
-  public function getReasonPhrase() {
+  public function getReasonPhrase(): string {
     return $this->reason;
   }
 
-  public function withStatus($code, $reasonPhrase = '') {
+  public function withStatus(int $code, string $reasonPhrase = ''): this {
     if (!$code is int && !$code is string) {
       throw new \InvalidArgumentException('Status code has to be an integer');
     }
@@ -110,5 +109,23 @@ class Response implements ResponseInterface {
     }
     $new->reason = $reasonPhrase;
     return $new;
+  }
+
+  public function getBody(): IO\WriteHandle {
+    $wh = $this->writeHandle;
+    invariant($wh is IO\WriteHandle, "handler error.");
+    return $wh;
+  }
+
+  public function withBody(IO\WriteHandle $body): this {
+    $new = clone $this;
+    $new->writeHandle = $body;
+    return $new;
+  }
+
+  public function readBody(): IO\ReadHandle {
+    $rh = $this->readHandle;
+    invariant($rh is IO\ReadHandle, "handler error.");
+    return $rh;
   }
 }

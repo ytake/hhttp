@@ -2,10 +2,10 @@
 
 use type Ytake\Hhttp\Uri;
 use type Ytake\Hhttp\Request;
-use type Ytake\Hhttp\HttpMethod;
 use type Facebook\HackTest\HackTest;
-use type Psr\Http\Message\StreamInterface;
 
+use namespace HH\Lib\Experimental\IO;
+use namespace Facebook\Experimental\Http\Message;
 use function Facebook\FBExpect\expect;
 
 final class RequestTest extends HackTest {
@@ -27,21 +27,19 @@ final class RequestTest extends HackTest {
   }
 
   public function testCanConstructWithBody(): void {
-    $r = new Request('/', HttpMethod::GET, 'baz', Map{});
-    expect($r->getBody())->toBeInstanceOf(StreamInterface::class);
-    expect((string) $r->getBody())->toBeSame('baz');
+    $r = new Request('/', Message\HTTPMethod::GET, 'baz', Map{});
+    expect($r->getBody())->toBeInstanceOf(IO\ReadHandle::class);
+    expect($r->getBody()->rawReadBlocking())->toBeSame('baz');
   }
 
   public function testNullBody(): void{
-    $r = new Request('/', HttpMethod::GET, null, Map{});
-    expect($r->getBody())->toBeInstanceOf(StreamInterface::class);
-    expect((string) $r->getBody())->toBeSame('');
+    $r = new Request('/', Message\HTTPMethod::GET, '', Map{});
+    expect($r->getBody()->rawReadBlocking())->toBeSame('');
   }
 
   public function testFalseyBody(): void {
-    $r = new Request('/', HttpMethod::GET, '0', Map{});
-    expect($r->getBody())->toBeInstanceOf(StreamInterface::class);
-    expect((string) $r->getBody())->toBeSame('0');
+    $r = new Request('/', Message\HTTPMethod::GET, '0', Map{});
+    expect($r->getBody()->rawReadBlocking())->toBeSame('0');
   }
 
   public function testWithUri(): void {
@@ -93,7 +91,12 @@ final class RequestTest extends HackTest {
   }
 
   public function testHostIsAddedFirst(): void {
-    $r = new Request('http://foo.com/baz?bar=bam', HttpMethod::GET, 'php://temp', Map{'Foo' => varray['Bar']});
+    $r = new Request(
+      'http://foo.com/baz?bar=bam',
+      Message\HTTPMethod::GET,
+      'testing',
+      Map{'Foo' => vec['Bar']}
+    );
     expect($r->getHeaders())->toContainKey('Host');
     expect($r->getHeaders())->toContainKey('Foo');
   }
@@ -101,10 +104,10 @@ final class RequestTest extends HackTest {
   public function testCanGetHeaderAsCsv(): void {
     $r = new Request(
       'http://foo.com/baz?bar=bam',
-      HttpMethod::GET,
-      'php://temp',
+      Message\HTTPMethod::GET,
+      'testing',
       Map{
-        'Foo' => varray['a', 'b', 'c'],
+        'Foo' => vec['a', 'b', 'c'],
       }
     );
     expect($r->getHeaderLine('Foo'))->toBeSame('a, b, c');
@@ -112,33 +115,33 @@ final class RequestTest extends HackTest {
   }
 
   public function testHostIsNotOverwrittenWhenPreservingHost(): void {
-    $r = new Request('http://foo.com/baz?bar=bam', HttpMethod::GET, 'php://temp', Map{'Host' => varray['a.com']});
-    expect($r->getHeaders())->toBeSame(['Host' => ['a.com']]);
-    $r2 = $r->withUri(new Uri('http://www.foo.com/bar'), true);
+    $r = new Request('http://foo.com/baz?bar=bam', Message\HTTPMethod::GET, 'testing', Map{'Host' => vec['a.com']});
+    expect($r->getHeaders())->toBeSame(dict['Host' => vec['a.com']]);
+    $r2 = $r->withUri(new Uri('http://www.foo.com/bar'), shape('preserveHost' => true));
     expect($r2->getHeaderLine('Host'))->toBeSame('a.com');
   }
 
   public function testOverridesHostWithUri(): void {
     $r = new Request('http://foo.com/baz?bar=bam');
-    expect($r->getHeaders())->toBeSame(['Host' => ['foo.com']]);
+    expect($r->getHeaders())->toBeSame(dict['Host' => vec['foo.com']]);
     $r2 = $r->withUri(new Uri('http://www.baz.com/bar'));
     expect($r2->getHeaderLine('Host'))->toBeSame('www.baz.com');
   }
 
   public function testAggregatesHeaders(): void {
-    $r = new Request('', HttpMethod::GET, 'php://temp', Map{
-      'ZOO' => ['zoobar'],
-      'zoo' => ['foobar', 'zoobar'],
+    $r = new Request('', Message\HTTPMethod::GET, 'testing', Map{
+      'ZOO' => vec['zoobar'],
+      'zoo' => vec['foobar', 'zoobar'],
     });
-    expect($r->getHeaders())->toBeSame(['ZOO' => ['zoobar', 'foobar', 'zoobar']]);
+    expect($r->getHeaders())->toBeSame(dict['ZOO' => vec['zoobar', 'foobar', 'zoobar']]);
     expect($r->getHeaderLine('zoo'))->toBeSame('zoobar, foobar, zoobar');
   }
 
   public function testSupportNumericHeaders(): void {
-    $r = new Request('', HttpMethod::GET, 'php://temp', Map{
-      'Content-Length' => varray['200'],
+    $r = new Request('', Message\HTTPMethod::GET, 'testing', Map{
+      'Content-Length' => vec['200'],
     });
-    expect($r->getHeaders())->toBeSame(['Content-Length' => ['200']]);
+    expect($r->getHeaders())->toBeSame(dict['Content-Length' => vec['200']]);
     expect($r->getHeaderLine('Content-Length'))->toBeSame('200');
   }
 
@@ -156,13 +159,12 @@ final class RequestTest extends HackTest {
   <<ExpectedException(\InvalidArgumentException::class), ExpectedExceptionMessage('Header name must be an RFC 7230 compatible string.')>>
   public function testCannotHaveHeaderWithEmptyName(): void {
     $r = new Request('https://example.com/');
-    $r->withHeader('', 'Bar');
+    $r->withHeader('', vec['Bar']);
   }
 
-  <<ExpectedException(\InvalidArgumentException::class)>>
   public function testCanHaveHeaderWithEmptyValue(): void {
     $r = new Request('https://example.com/');
-    $r = $r->withHeader('Foo', '');
-    expect($r->getHeader('Foo'))->toBeSame(['']);
+    $r = $r->withHeader('Foo', vec['']);
+    expect($r->getHeader('Foo'))->toBeSame(vec['']);
   }
 }
