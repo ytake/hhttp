@@ -84,9 +84,11 @@ class Response implements ResponseInterface {
     $this->setHeaders($headers);
     $this->createIO();
     $this->getBody()->rawWriteBlocking($body);
-    $this->reason = $reason;
     if ($this->phrases->contains($status)) {
       $this->reason = $this->phrases->at($status);
+    }
+    if ($reason !== '') {
+      $this->reason = $reason;
     }
   }
 

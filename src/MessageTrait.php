@@ -2,7 +2,7 @@
 
 namespace Ytake\Hhttp;
 
-use namespace HH\Lib\{Str, Regex, Vec, C};
+use namespace HH\Lib\{Str, Regex, Vec, C, Dict};
 
 
 trait MessageTrait {
@@ -86,7 +86,10 @@ trait MessageTrait {
     $normalized = Str\lowercase($header);
     $new = clone $this;
     if ($this->headerNames->contains($normalized)) {
-      \unset($new->headers[$this->headerNames->at($normalized)]);
+      $new->headers = Dict\filter_keys(
+        $new->headers,
+        ($k) ==> $k !== $this->headerNames->at($normalized)
+      );
     }
     $new->headerNames->add(Pair{$normalized, $header});
     $new->headers[$header] = $this->filterHeaderValue($this->validateAndTrimHeader($header, $value));
@@ -102,7 +105,7 @@ trait MessageTrait {
       throw new \InvalidArgumentException('Header name must be an RFC 7230 compatible string.');
     }
     $new = clone $this;
-    $new = $new->withHeader($name, $value);
+    $new->setHeaders(Map{$name => $value});
     return $new;
   }
 
@@ -117,8 +120,10 @@ trait MessageTrait {
     }
     $header = $this->headerNames->at($normalized);
     $new = clone $this;
-    \unset($new->headers[$header]);
-    $new->headerNames->remove($normalized);
+    $m = new Map($new->headers);
+    $new->headers = dict($m->removeKey($header));
+    $nh = new Map($new->headerNames);
+    $new->headerNames = $nh->removeKey($normalized);
     return $new;
   }
 
