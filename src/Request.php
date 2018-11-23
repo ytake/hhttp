@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace Ytake\Hhttp;
+namespace Ytake\Hungrr;
 
 use type Facebook\Experimental\Http\Message\UriInterface;
 use type Facebook\Experimental\Http\Message\RequestInterface;
@@ -13,7 +13,7 @@ class Request implements RequestInterface {
     mixed $uri,
     Message\HTTPMethod $method = Message\HTTPMethod::GET,
     string $body = '',
-    Map<string, vec<string>> $headers = Map{},
+    dict<string, vec<string>> $headers = dict[],
     string $version = '1.1'
   ) {
     if ($uri is string) {

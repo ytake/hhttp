@@ -1,9 +1,7 @@
 <?hh // strict
 
-namespace Ytake\Hhttp\Exception;
+namespace Ytake\Hungrr\Exception;
 
-use type InvalidArgumentException;
-
-final class UriFormatException extends InvalidArgumentException {
+final class UriFormatException extends \InvalidArgumentException {
 
 }

@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace Ytake\Hhttp;
+namespace Ytake\Hungrr;
 
 use type Facebook\Experimental\Http\Message\UriInterface;
 use function parse_url;

@@ -1,5 +1,5 @@
 {
-  "name": "ytake/hhttp",
+  "name": "ytake/hungrr",
   "description": "HTTP Requesr and Response",
   "minimum-stability": "stable",
   "type": "library",
@@ -22,8 +22,6 @@
   ],
   "require": {
     "hhvm": ">=3.29",
-    "psr/container": "^1.0",
-    "usox/hack-http-factory-interfaces": "0.1.0",
     "hhvm/hsl-experimental": "^3.29",
     "facebook/hack-http-request-response-interfaces": "dev-master",
     "ytake/hack-http-server-request-handlers-interfaces": "^1.0.0"
@@ -35,7 +33,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Ytake\\Hhttp\\": "src/"
+      "Ytake\\Hungrr\\": "src/"
     }
   },
   "autoload-dev": {

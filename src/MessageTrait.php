@@ -1,20 +1,20 @@
 <?hh // strict
 
-namespace Ytake\Hhttp;
+namespace Ytake\Hungrr;
 
 use namespace HH\Lib\{Str, Regex, Vec, C, Dict};
-
+use function array_key_exists;
 
 trait MessageTrait {
 
   private dict<string, vec<string>> $headers = dict[];
-  private Map<string, string> $headerNames = Map{};
+  private dict<string, string> $headerNames = dict[];
 
   private string $protocol = '1.1';
 
   protected function extractHeaders(string $header, vec<string> $value): void {
     $nh = Str\lowercase($header);
-    if ($this->headerNames->contains($nh)) {
+    if (array_key_exists($nh, $this->headerNames)) {
       $header = $this->headerNames[$nh];
       $this->headers[$header] =  Vec\concat($this->headers[$header], $value);
       return;
@@ -23,7 +23,7 @@ trait MessageTrait {
     $this->headers[$header] = $value;
   }
 
-  private function setHeaders(Map<string, vec<string>> $originalHeaders) : void {
+  private function setHeaders(dict<string, vec<string>> $originalHeaders) : void {
     foreach ($originalHeaders as $header => $value) {
       $this->assertHeader($header);
       $this->extractHeaders(
@@ -67,15 +67,15 @@ trait MessageTrait {
   }
 
   public function hasHeader(string $header): bool {
-    return $this->headerNames->contains(Str\lowercase($header));
+    return array_key_exists(Str\lowercase($header), $this->headerNames);
   }
 
   public function getHeader(string $header): vec<string> {
     $lowHeader = Str\lowercase($header);
-    if (!$this->headerNames->contains($lowHeader)) {
+    if (!array_key_exists($lowHeader, $this->headerNames)) {
       return vec[];
     }
-    return $this->headers[$this->headerNames->at($lowHeader)];
+    return $this->headers[$this->headerNames[$lowHeader]];
   }
 
   public function getHeaderLine(string $header): string {
@@ -83,15 +83,15 @@ trait MessageTrait {
   }
 
   public function withHeader(string $header, vec<string> $value): this {
-    $normalized = Str\lowercase($header);
+    $lowHeader = Str\lowercase($header);
     $new = clone $this;
-    if ($this->headerNames->contains($normalized)) {
+    if (array_key_exists($lowHeader, $this->headerNames)) {
       $new->headers = Dict\filter_keys(
         $new->headers,
-        ($k) ==> $k !== $this->headerNames->at($normalized)
+        ($k) ==> $k !== $this->headerNames[$lowHeader]
       );
     }
-    $new->headerNames->add(Pair{$normalized, $header});
+    $new->headerNames[$lowHeader] = $header;
     $new->headers[$header] = $this->filterHeaderValue($this->validateAndTrimHeader($header, $value));
     return $new;
   }
@@ -105,7 +105,7 @@ trait MessageTrait {
       throw new \InvalidArgumentException('Header name must be an RFC 7230 compatible string.');
     }
     $new = clone $this;
-    $new->setHeaders(Map{$name => $value});
+    $new->setHeaders(dict[$name => $value]);
     return $new;
   }
 
@@ -114,16 +114,16 @@ trait MessageTrait {
   }
 
   public function withoutHeader(string $header): this {
-    $normalized = Str\lowercase($header);
-    if (!$this->headerNames->contains($normalized)) {
+    $lowHeader = Str\lowercase($header);
+    if (!array_key_exists($lowHeader, $this->headerNames)) {
       return $this;
     }
-    $header = $this->headerNames->at($normalized);
+    $header = $this->headerNames[$lowHeader];
     $new = clone $this;
     $m = new Map($new->headers);
     $new->headers = dict($m->removeKey($header));
     $nh = new Map($new->headerNames);
-    $new->headerNames = $nh->removeKey($normalized);
+    $new->headerNames = dict($nh->removeKey($lowHeader));
     return $new;
   }
 
