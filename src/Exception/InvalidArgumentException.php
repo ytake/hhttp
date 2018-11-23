@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace Ytake\Hhttp\Exception;
+namespace Ytake\Hungrr\Exception;
 
 final class InvalidArgumentException extends \InvalidArgumentException {
 

@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace Ytake\Hhttp;
+namespace Ytake\Hungrr;
 
 use namespace HH\Lib\Experimental\IO;
 

@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace Ytake\Hhttp;
+namespace Ytake\Hungrr;
 
 use type Facebook\Experimental\Http\Message\UriInterface;
 use type Facebook\Experimental\Http\Message\RequestInterface;
@@ -9,6 +9,8 @@ use type Facebook\Experimental\Http\Message\RequestURIOptions;
 use namespace HH\Lib\Experimental\IO;
 use namespace Facebook\Experimental\Http\Message;
 use namespace HH\Lib\Regex;
+
+use function array_key_exists;
 
 trait RequestTrait {
   use MessageTrait, IOTrait;
@@ -110,10 +112,10 @@ trait RequestTrait {
     if (null !== ($port = $uri->getPort())) {
       $host .= ':'.$port;
     }
-    if (!$this->headerNames->contains('host')) {
-      $this->headerNames->add(Pair{'host', 'Host'});
+    if (!array_key_exists('host', $this->headerNames)) {
+      $this->headerNames['host'] = 'Host';
     }
-    $this->headers[$this->headerNames->at('host')] = vec[$host];
+    $this->headers[$this->headerNames['host']] = vec[$host];
   }
 
   public function getBody(): IO\ReadHandle {

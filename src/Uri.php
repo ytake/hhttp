@@ -1,10 +1,10 @@
 <?hh // strict
 
-namespace Ytake\Hhttp;
+namespace Ytake\Hungrr;
 
 use type Facebook\Experimental\Http\Message\UriInterface;
 
-use namespace Ytake\Hhttp\Exception;
+use namespace Ytake\Hungrr\Exception;
 use namespace HH\Lib\{Str, C, Dict};
 use function preg_replace_callback;
 use function array_key_exists;

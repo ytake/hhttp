@@ -1,6 +1,6 @@
 <?hh // strict
 
-use type Ytake\Hhttp\Uri;
+use type Ytake\Hungrr\Uri;
 use type Facebook\HackTest\HackTest;
 
 use function strval;
