@@ -23,7 +23,7 @@ trait MessageTrait {
     $this->headers[$header] = $value;
   }
 
-  private function setHeaders(dict<string, vec<string>> $originalHeaders) : void {
+  private function setHeaders(dict<string, vec<string>> $originalHeaders): void {
     foreach ($originalHeaders as $header => $value) {
       $this->assertHeader($header);
       $this->extractHeaders(
@@ -33,7 +33,7 @@ trait MessageTrait {
     }
   }
 
-  private function assertHeader(string $name) : void {
+  private function assertHeader(string $name): void {
     AssertHeader::assertValidName($name);
   }
 
