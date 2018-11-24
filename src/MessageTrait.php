@@ -120,10 +120,8 @@ trait MessageTrait {
     }
     $header = $this->headerNames[$lowHeader];
     $new = clone $this;
-    $m = new Map($new->headers);
-    $new->headers = dict($m->removeKey($header));
-    $nh = new Map($new->headerNames);
-    $new->headerNames = dict($nh->removeKey($lowHeader));
+    $new->headers = Dict\filter_keys($new->headers, ($k) ==> $k !== $header);
+    $new->headerNames = Dict\filter_keys($new->headerNames, ($k) ==> $k !== $lowHeader);
     return $new;
   }
 
