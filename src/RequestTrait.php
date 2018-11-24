@@ -72,7 +72,7 @@ trait RequestTrait {
   }
 
   <<__Rx>>
-  public function getMethod():  Message\HTTPMethod {
+  public function getMethod(): Message\HTTPMethod {
     return $this->method;
   }
 

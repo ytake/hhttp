@@ -18,7 +18,7 @@ final class AssertHeader {
   private function __construct() {
   }
 
-  public static function filter(string $value) : string {
+  public static function filter(string $value): string {
     $string = '';
     $chunked = Str\chunk($value);
     for ($i = 0; $i < Str\length($value); $i += 1) {
@@ -43,7 +43,7 @@ final class AssertHeader {
     return $string;
   }
 
-  public static function isValid(mixed $value) : bool {
+  public static function isValid(mixed $value): bool {
     $value  = (string) $value;
     if (Regex\matches($value, re"#(?:(?:(?<!\r)\n)|(?:\r(?!\n))|(?:\r\n(?![ \t])))#")) {
       return false;
