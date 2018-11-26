@@ -1,5 +1,21 @@
 <?hh // strict
 
+/**
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license.
+ *
+ * Copyright (c) 2018 Yuuki Takezawa
+ *
+ */
+
 namespace Ytake\Hungrr;
 
 use type Facebook\Experimental\Http\Message\UriInterface;
@@ -18,7 +34,25 @@ trait RequestTrait {
 
   private Message\HTTPMethod $method;
   private ?string $requestTarget;
-  private UriInterface $uri;
+  protected ?UriInterface $uri;
+  
+  private function initialize(
+    mixed $uri,
+    dict<string, vec<string>> $headers = dict[],
+    string $body = '',
+  ): void {
+    if ($uri is string) {
+      $uri = new Uri($uri);
+    }
+    invariant($uri is UriInterface, "\$uri, not implements UriInterface");
+    $this->uri = $uri;
+    $this->setHeaders($headers);
+    if (!$this->hasHeader('Host')) {
+      $this->updateHostFromUri();
+    }
+    $this->createIO();
+    $this->setBody($body);
+  }
 
   private function createUri(mixed $uri): UriInterface {
     if ($uri is UriInterface) {
