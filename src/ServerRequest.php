@@ -1,8 +1,24 @@
 <?hh // strict
 
+/**
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the MIT license.
+ *
+ * Copyright (c) 2018 Yuuki Takezawa
+ *
+ */
+
 namespace Ytake\Hungrr;
 
-use type Facebook\Experimental\Http\Message\{ServerRequestInterface, UploadedFileInterface, UriInterface};
+use type Facebook\Experimental\Http\Message\{ServerRequestInterface, UploadedFileInterface};
 
 use namespace Facebook\Experimental\Http\Message;
 
@@ -17,24 +33,15 @@ class ServerRequest implements ServerRequestInterface {
 
   public function __construct(
     mixed $uri,
-    private Message\HTTPMethod $method = Message\HTTPMethod::GET,
+    Message\HTTPMethod $method = Message\HTTPMethod::GET,
     dict<string, vec<string>> $headers = dict[],
     string $body = '',
-    string $version = '1.1',
+    string $protocol = '1.1',
     protected dict<string, string> $serverParams = dict[]
   ) {
-    if ($uri is string) {
-      $uri = new Uri($uri);
-    }
-    invariant($uri is UriInterface, "\$uri, not implements UriInterface");
-    $this->uri = $uri;
-    $this->setHeaders($headers);
-    $this->protocol = $version;
-    if (!$this->hasHeader('Host')) {
-      $this->updateHostFromUri();
-    }
-    $this->createIO();
-    $this->setBody($body);
+    $this->protocol = $protocol;
+    $this->method = $method;
+    $this->initialize($uri, $headers, $body);
   }
 
   public function getServerParams(): dict<string, string> {
