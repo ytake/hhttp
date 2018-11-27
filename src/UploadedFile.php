@@ -15,7 +15,7 @@
  * Copyright (c) 2018 Yuuki Takezawa
  *
  */
- 
+
 namespace Ytake\Hungrr;
 
 use namespace HH\Lib\Str;

@@ -30,8 +30,10 @@ final class UploadedFileTest extends HackTest {
     copy(__FILE__, $from);
     $uf = new UploadedFile($from, null,basename($from), 'text/plain');
     $uf->moveTo($to);
-    expect($tf = file_get_contents($to))->toNotBeEmpty();
-    expect($ff = file_get_contents(__FILE__))->toNotBeEmpty();
+    $tf = file_get_contents($to);
+    $ff = file_get_contents(__FILE__);
+    expect($tf)->toNotBeEmpty();
+    expect($ff)->toNotBeEmpty();
     expect($tf)->toBeSame($ff);
   }
 

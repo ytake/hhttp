@@ -15,10 +15,10 @@
  * Copyright (c) 2018 Yuuki Takezawa
  *
  */
- 
+
 namespace Ytake\Hungrr;
 
-use type Facebook\Experimental\Http\Message\{ServerRequestInterface, UploadedFileInterface, UriInterface};
+use type Facebook\Experimental\Http\Message\{ServerRequestInterface, UploadedFileInterface};
 
 use namespace Facebook\Experimental\Http\Message;
 
@@ -33,24 +33,15 @@ class ServerRequest implements ServerRequestInterface {
 
   public function __construct(
     mixed $uri,
-    private Message\HTTPMethod $method = Message\HTTPMethod::GET,
+    Message\HTTPMethod $method = Message\HTTPMethod::GET,
     dict<string, vec<string>> $headers = dict[],
     string $body = '',
-    string $version = '1.1',
+    string $protocol = '1.1',
     protected dict<string, string> $serverParams = dict[]
   ) {
-    if ($uri is string) {
-      $uri = new Uri($uri);
-    }
-    invariant($uri is UriInterface, "\$uri, not implements UriInterface");
-    $this->uri = $uri;
-    $this->setHeaders($headers);
-    $this->protocol = $version;
-    if (!$this->hasHeader('Host')) {
-      $this->updateHostFromUri();
-    }
-    $this->createIO();
-    $this->setBody($body);
+    $this->protocol = $protocol;
+    $this->method = $method;
+    $this->initialize($uri, $headers, $body);
   }
 
   public function getServerParams(): dict<string, string> {

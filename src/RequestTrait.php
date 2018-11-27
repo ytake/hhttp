@@ -35,7 +35,7 @@ trait RequestTrait {
   private Message\HTTPMethod $method;
   private ?string $requestTarget;
   protected ?UriInterface $uri;
-  
+
   private function initialize(
     mixed $uri,
     dict<string, vec<string>> $headers = dict[],

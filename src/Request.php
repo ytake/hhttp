@@ -18,7 +18,6 @@
 
 namespace Ytake\Hungrr;
 
-use type Facebook\Experimental\Http\Message\UriInterface;
 use type Facebook\Experimental\Http\Message\RequestInterface;
 use namespace Facebook\Experimental\Http\Message;
 
@@ -30,8 +29,9 @@ class Request implements RequestInterface {
     Message\HTTPMethod $method = Message\HTTPMethod::GET,
     dict<string, vec<string>> $headers = dict[],
     string $body = '',
-    protected string $protocol = '1.1'
+    string $protocol = '1.1'
   ) {
+    $this->protocol = $protocol;
     $this->method = $method;
     $this->initialize($uri, $headers, $body);
   }

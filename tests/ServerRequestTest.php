@@ -1,11 +1,8 @@
 <?hh // strict
 
-use type Ytake\Hungrr\Uri;
-use type Ytake\Hungrr\Request;
 use type Ytake\Hungrr\ServerRequest;
 use type Facebook\HackTest\HackTest;
 
-use namespace HH\Lib\Experimental\IO;
 use namespace Facebook\Experimental\Http\Message;
 use function Facebook\FBExpect\expect;
 
