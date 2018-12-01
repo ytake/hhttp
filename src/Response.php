@@ -91,9 +91,9 @@ class Response implements ResponseInterface {
   };
 
   public function __construct(
+    string $body = '',
     private StatusCode $status = StatusCode::OK,
     dict<string, vec<string>> $headers = dict[],
-    string $body = '',
     private string $protocol = '1.1',
     protected string $reason = ''
   ) {
