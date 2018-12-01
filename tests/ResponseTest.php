@@ -10,7 +10,7 @@ use function Facebook\FBExpect\expect;
 final class ResponseTest extends HackTest {
 
   public function testDefaultConstructor(): void {
-    $r = new Response();
+    $r = new Response('',);
     expect($r->getStatusCode())->toBeSame(200);
     expect($r->getProtocolVersion())->toBeSame('1.1');
     expect($r->getReasonPhrase())->toBeSame('OK');
@@ -19,13 +19,13 @@ final class ResponseTest extends HackTest {
   }
 
   public function testCanConstructWithStatusCode(): void {
-    $r = new Response(StatusCode::NOT_FOUND);
+    $r = new Response('', StatusCode::NOT_FOUND);
     expect($r->getStatusCode())->toBeSame(404);
     expect($r->getReasonPhrase())->toBeSame('Not Found');
   }
 
   public function testStatusCanBeNumericString(): void {
-    $r = new Response(StatusCode::NOT_FOUND);
+    $r = new Response('', StatusCode::NOT_FOUND);
     $r2 = $r->withStatus(StatusCode::CREATED);
     expect($r->getStatusCode())->toBeSame(404);
     expect($r->getReasonPhrase())->toBeSame('Not Found');
@@ -34,76 +34,76 @@ final class ResponseTest extends HackTest {
   }
 
   public function testCanConstructWithHeaders(): void {
-    $r = new Response(StatusCode::OK, dict['Foo' => vec['Bar']]);
+    $r = new Response('', StatusCode::OK, dict['Foo' => vec['Bar']]);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
     expect($r->getHeaderLine('Foo'))->toBeSame('Bar');
     expect($r->getHeader('Foo'))->toBeSame(vec['Bar']);
   }
 
   public function testCanConstructWithBody(): void {
-    $r = new Response(StatusCode::OK, dict[], 'baz');
+    $r = new Response('baz', StatusCode::OK, dict[]);
     expect($r->getBody())->toBeInstanceOf(IO\ReadHandle::class);
     expect($r->readBody()->rawReadBlocking())->toBeSame('baz');
   }
 
   public function testNullBody(): void {
-    $r = new Response(StatusCode::OK, dict[]);
+    $r = new Response('', StatusCode::OK, dict[]);
     expect($r->getBody())->toBeInstanceOf(IO\ReadHandle::class);
     expect($r->readBody()->rawReadBlocking())->toBeSame('');
   }
 
   public function testFalseyBody(): void {
-    $r = new Response(StatusCode::OK, dict[], '0');
+    $r = new Response('0', StatusCode::OK, dict[]);
     expect($r->getBody())->toBeInstanceOf(IO\ReadHandle::class);
     expect($r->readBody()->rawReadBlocking())->toBeSame('0');
   }
 
   public function testCanConstructWithReason(): void {
-    $r = new Response(StatusCode::OK, dict[], '', '1.1', 'bar');
+    $r = new Response('', StatusCode::OK, dict[], '1.1', 'bar');
     expect($r->getReasonPhrase())->toBeSame('bar');
-    $r = new Response(StatusCode::OK, dict[], '', '1.1', '0');
+    $r = new Response('', StatusCode::OK, dict[], '1.1', '0');
     expect($r->getReasonPhrase())->toBeSame('0');
   }
 
   public function testCanConstructWithProtocolVersion(): void {
-    $r = new Response(StatusCode::OK, dict[], '', '1000');
+    $r = new Response('', StatusCode::OK, dict[], '1000');
     expect($r->getProtocolVersion())->toBeSame('1000');
   }
 
   public function testWithStatusCodeAndNoReason(): void {
-    $r = (new Response())->withStatus(201);
+    $r = (new Response('',))->withStatus(201);
     expect($r->getStatusCode())->toBeSame(201);
     expect($r->getReasonPhrase())->toBeSame('Created');
   }
 
   public function testWithStatusCodeAndReason(): void {
-    $r = (new Response())->withStatus(201, 'Foo');
+    $r = (new Response('',))->withStatus(201, 'Foo');
     expect($r->getStatusCode())->toBeSame(201);
     expect($r->getReasonPhrase())->toBeSame('Foo');
-    $r = (new Response())->withStatus(201, '0');
+    $r = (new Response('',))->withStatus(201, '0');
     expect($r->getStatusCode())->toBeSame(201);
     expect($r->getReasonPhrase())->toBeSame('0');
   }
 
   public function testWithProtocolVersion(): void {
-    $r = (new Response())->withProtocolVersion('1000');
+    $r = (new Response('',))->withProtocolVersion('1000');
     expect($r->getProtocolVersion())->toBeSame('1000');
   }
 
   public function testSameInstanceWhenSameProtocol(): void {
-    $r = new Response();
+    $r = new Response('',);
     expect($r->withProtocolVersion('1.1'))->toBeSame($r);
   }
 
   public function testWithBody(): void {
-    $r = new Response();
+    $r = new Response('',);
     $r->setBody('testing');
     expect($r->getBody())->toBeInstanceOf(IO\ReadHandle::class);
     expect($r->readBody()->rawReadBlocking())->toBeSame('testing');
   }
 
   public function testWithHeader(): void {
-    $r = new Response(StatusCode::OK, dict['Foo' => vec['Bar']]);
+    $r = new Response('', StatusCode::OK, dict['Foo' => vec['Bar']]);
     $r2 = $r->withHeader('baZ', vec['Bam']);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
     expect($r2->getHeaders())->toBeSame(dict['Foo' => vec['Bar'], 'baZ' => vec['Bam']]);
@@ -112,7 +112,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithHeaderAsArray(): void {
-    $r = new Response(StatusCode::OK, dict['Foo' => vec['Bar']]);
+    $r = new Response('', StatusCode::OK, dict['Foo' => vec['Bar']]);
     $r2 = $r->withHeader('baZ', vec['Bam', 'Bar']);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
     expect($r2->getHeaders())->toBeSame(dict['Foo' => vec['Bar'], 'baZ' => vec['Bam', 'Bar']]);
@@ -121,7 +121,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithHeaderReplacesDifferentCase(): void {
-    $r = new Response(StatusCode::OK, dict['Foo' => vec['Bar']]);
+    $r = new Response('', StatusCode::OK, dict['Foo' => vec['Bar']]);
     $r2 = $r->withHeader('foO', vec['Bam']);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
     expect($r2->getHeaders())->toBeSame(dict['foO' => vec['Bam']]);
@@ -130,7 +130,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithAddedHeader(): void {
-    $r = new Response(StatusCode::OK, dict['Foo' => vec['Bar']]);
+    $r = new Response('', StatusCode::OK, dict['Foo' => vec['Bar']]);
     $r2 = $r->withAddedHeader('foO', vec['Baz']);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
     expect($r2->getHeaders())->toBeSame(dict['Foo' => vec['Bar', 'Baz']]);
@@ -139,7 +139,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithAddedHeaderAsArray(): void {
-    $r = new Response(StatusCode::OK, dict['Foo' => vec['Bar']]);
+    $r = new Response('', StatusCode::OK, dict['Foo' => vec['Bar']]);
     $r2 = $r->withAddedHeader('foO', vec['Baz', 'Bam']);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
     expect($r2->getHeaders())->toBeSame(dict['Foo' => vec['Bar', 'Baz', 'Bam']]);
@@ -148,7 +148,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithAddedHeaderThatDoesNotExist(): void {
-    $r = new Response(StatusCode::OK, dict['Foo' => vec['Bar']]);
+    $r = new Response('', StatusCode::OK, dict['Foo' => vec['Bar']]);
     $r2 = $r->withAddedHeader('nEw', vec['Baz']);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
     expect($r2->getHeaders())->toBeSame(dict['Foo' => vec['Bar'], 'nEw' => vec['Baz']]);
@@ -157,7 +157,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithoutHeaderThatExists(): void {
-    $r = new Response(StatusCode::OK, dict['Foo' => vec['Bar'], 'Baz' => vec['Bam']]);
+    $r = new Response('', StatusCode::OK, dict['Foo' => vec['Bar'], 'Baz' => vec['Bam']]);
     $r2 = $r->withoutHeader('foO');
     expect($r->hasHeader('foo'))->toBeTrue();
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar'], 'Baz' => vec['Bam']]);
@@ -166,7 +166,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithoutHeaderThatDoesNotExist(): void {
-    $r = new Response(StatusCode::OK, dict['Baz' => vec['Bam']]);
+    $r = new Response('', StatusCode::OK, dict['Baz' => vec['Bam']]);
     $r2 = $r->withoutHeader('foO');
     expect($r2)->toBeSame($r);
     expect($r2->hasHeader('foo'))->toBeFalse();
@@ -174,15 +174,15 @@ final class ResponseTest extends HackTest {
   }
 
   public function testSameInstanceWhenRemovingMissingHeader(): void {
-    $r = new Response();
+    $r = new Response('',);
     expect($r->withoutHeader('foo'))->toBeSame($r);
   }
 
   public function trimmedHeaderValues(): vec<(Response)> {
     return vec[
-      tuple(new Response(StatusCode::OK, dict['OWS' => vec[" \t \tFoo\t \t "]])),
-      tuple((new Response())->withHeader('OWS', vec[" \t \tFoo\t \t "])),
-      tuple((new Response())->withAddedHeader('OWS', vec[" \t \tFoo\t \t "])),
+      tuple(new Response('',StatusCode::OK, dict['OWS' => vec[" \t \tFoo\t \t "]])),
+      tuple((new Response('',))->withHeader('OWS', vec[" \t \tFoo\t \t "])),
+      tuple((new Response('',))->withAddedHeader('OWS', vec[" \t \tFoo\t \t "])),
     ];
   }
 

@@ -18,7 +18,8 @@
 
 namespace Ytake\Hungrr;
 
-use type Facebook\Experimental\Http\Message\{ServerRequestInterface, UploadedFileInterface};
+use type Facebook\Experimental\Http\Message\ServerRequestInterface;
+use type Facebook\Experimental\Http\Message\UploadedFileInterface;
 
 use namespace Facebook\Experimental\Http\Message;
 
