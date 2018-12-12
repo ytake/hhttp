@@ -39,7 +39,7 @@ class RedirectResponse extends Response {
   ) {
     $headers['location'] = vec[(string) $uri];
     parent::__construct(
-      IO\request_input(),
+      IO\request_output(),
       $status,
       $headers,
     );

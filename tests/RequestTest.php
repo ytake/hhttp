@@ -11,39 +11,45 @@ use function Facebook\FBExpect\expect;
 final class RequestTest extends HackTest {
 
   public function testRequestUriMayBeString(): void {
-    $r = new Request('/');
+    $r = new Request(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
     expect((string) $r->getUri())->toBeSame('/');
   }
 
   public function testRequestUriMayBeUri(): void {
     $uri = new Uri('/');
-    $r = new Request($uri);
+    $r = new Request(Message\HTTPMethod::GET, $uri, IO\request_input());
     expect($r->getUri())->toBeSame($uri);
   }
 
   <<ExpectedException(\InvalidArgumentException::class), ExpectedExceptionMessage('Unable to parse URI: ///')>>
   public function testValidateRequestUri(): void {
-    new Request('///');
+    new Request(Message\HTTPMethod::GET, new Uri('///'), IO\request_input());
   }
 
   public function testCanConstructWithBody(): void {
-    $r = new Request('/', Message\HTTPMethod::GET, dict[], 'baz');
+    list($r, $w) = IO\pipe_non_disposable();
+    $w->rawWriteBlocking('baz');
+    $r = new Request(Message\HTTPMethod::GET, new Uri('/'), $r);
     expect($r->getBody())->toBeInstanceOf(IO\ReadHandle::class);
     expect($r->getBody()->rawReadBlocking())->toBeSame('baz');
   }
 
   public function testNullBody(): void{
-    $r = new Request('/', Message\HTTPMethod::GET, dict[], '',);
+    list($r, $w) = IO\pipe_non_disposable();
+    $w->rawWriteBlocking('');
+    $r = new Request(Message\HTTPMethod::GET, new Uri('/'), $r);
     expect($r->getBody()->rawReadBlocking())->toBeSame('');
   }
 
   public function testFalseyBody(): void {
-    $r = new Request('/', Message\HTTPMethod::GET, dict[], '0');
+    list($r, $w) = IO\pipe_non_disposable();
+    $w->rawWriteBlocking('0');
+    $r = new Request(Message\HTTPMethod::GET, new Uri('/'), $r);
     expect($r->getBody()->rawReadBlocking())->toBeSame('0');
   }
 
   public function testWithUri(): void {
-    $r1 = new Request('/');
+    $r1 = new Request(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
     $u1 = $r1->getUri();
     $u2 = new Uri('http://www.example.com');
     $r2 = $r1->withUri($u2);
@@ -53,13 +59,13 @@ final class RequestTest extends HackTest {
   }
 
   public function testSameInstanceWhenSameUri(): void {
-    $r1 = new Request('http://foo.com');
+    $r1 = new Request(Message\HTTPMethod::GET, new Uri('http://foo.com'), IO\request_input());
     $r2 = $r1->withUri($r1->getUri());
     expect($r2)->toBeSame($r1);
   }
 
   public function testWithRequestTarget(): void {
-    $r1 = new Request('/');
+    $r1 = new Request(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
     $r2 = $r1->withRequestTarget('*');
     expect($r2->getRequestTarget())->toBeSame('*');
     expect($r1->getRequestTarget())->toBeSame('/');
@@ -67,16 +73,16 @@ final class RequestTest extends HackTest {
 
   <<ExpectedException(\InvalidArgumentException::class), ExpectedExceptionMessage('Invalid request target provided; cannot contain whitespace')>>
   public function testRequestTargetDoesNotAllowSpaces(): void {
-    $r1 = new Request('/');
+    $r1 = new Request(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
     $r1->withRequestTarget('/foo bar');
   }
 
   public function testRequestTargetDefaultsToSlash(): void {
-    $r1 = new Request('');
+    $r1 = new Request(Message\HTTPMethod::GET, new Uri(''), IO\request_input());
     expect($r1->getRequestTarget())->toBeSame('/');
-    $r2 = new Request('*');
+    $r2 = new Request(Message\HTTPMethod::GET, new Uri('*'), IO\request_input());
     expect($r2->getRequestTarget())->toBeSame('*');
-    $r3 = new Request('http://foo.com/bar baz/');
+    $r3 = new Request(Message\HTTPMethod::GET, new Uri('http://foo.com/bar baz/'), IO\request_input());
     expect($r3->getRequestTarget())->toBeSame('/bar%20baz/');
   }
 

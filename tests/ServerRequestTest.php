@@ -11,6 +11,7 @@ final class ServerRequestTest extends HackTest {
 
   public function testShouldBeSameServerParams(): void {
     $params = dict['name' => 'value'];
+    list($r, $w) = IO\pipe_non_disposable();
     $request = new ServerRequest(
       Message\HTTPMethod::GET,
       new Uri('/'),
@@ -23,7 +24,7 @@ final class ServerRequestTest extends HackTest {
   }
 
   public function testShouldBeSameQueryParams(): void {
-    $request = new ServerRequest('/', Message\HTTPMethod::GET);
+    $request = new ServerRequest(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
     $params = dict['name' => 'value'];
     $request2 = $request->withQueryParams($params);
     expect($request)->toNotBeSame($request2);
@@ -32,7 +33,7 @@ final class ServerRequestTest extends HackTest {
   }
 
   public function testShouldBeSameCookieParams(): void {
-    $request = new ServerRequest('/');
+    $request = new ServerRequest(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
     $params = dict['name' => 'value'];
     $request2 = $request->withCookieParams($params);
     expect($request)->toNotBeSame($request2);
@@ -41,7 +42,7 @@ final class ServerRequestTest extends HackTest {
   }
 
   public function testShouldBeSameParsedBody(): void {
-    $request = new ServerRequest('/');
+    $request = new ServerRequest(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
     $params = dict['name' => 'value'];
     $request2 = $request->withParsedBody($params);
     expect($request)->toNotBeSame($request2);
