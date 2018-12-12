@@ -21,16 +21,18 @@ namespace Ytake\Hungrr\Response;
 use type Ytake\Hungrr\Response;
 use type Ytake\Hungrr\StatusCode;
 
+use namespace HH\Lib\Experimental\IO;
+
 class HtmlResponse extends Response {
   use InjectContentTypeTrait;
 
   public function __construct(
-    string $html,
+    private IO\WriteHandle $body,
     StatusCode $status = StatusCode::OK,
     dict<string, vec<string>> $headers = dict[]
   ) {
     parent::__construct(
-      $html,
+      $body,
       $status,
       /* HH_FIXME[3004] */
       $this->injectContentType('text/html; charset=utf-8', $headers),

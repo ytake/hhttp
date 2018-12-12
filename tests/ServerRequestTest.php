@@ -1,8 +1,9 @@
 <?hh // strict
 
+use type Ytake\Hungrr\Uri;
 use type Ytake\Hungrr\ServerRequest;
 use type Facebook\HackTest\HackTest;
-
+use namespace HH\Lib\Experimental\IO;
 use namespace Facebook\Experimental\Http\Message;
 use function Facebook\FBExpect\expect;
 
@@ -11,10 +12,10 @@ final class ServerRequestTest extends HackTest {
   public function testShouldBeSameServerParams(): void {
     $params = dict['name' => 'value'];
     $request = new ServerRequest(
-      '/',
       Message\HTTPMethod::GET,
+      new Uri('/'),
+      $r,
       dict[],
-      'baz',
       '1.1',
       $params
     );

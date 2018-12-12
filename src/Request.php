@@ -19,20 +19,21 @@
 namespace Ytake\Hungrr;
 
 use type Facebook\Experimental\Http\Message\RequestInterface;
+
 use namespace Facebook\Experimental\Http\Message;
+use namespace HH\Lib\Experimental\IO;
 
 class Request implements RequestInterface {
   use RequestTrait;
 
   public function __construct(
-    mixed $uri,
-    Message\HTTPMethod $method = Message\HTTPMethod::GET,
+    private Message\HTTPMethod $method,
+    private Message\UriInterface $uri,
+    private IO\ReadHandle $body,
     dict<string, vec<string>> $headers = dict[],
-    string $body = '',
     string $protocol = '1.1'
   ) {
+    $this->initialize($headers);
     $this->protocol = $protocol;
-    $this->method = $method;
-    $this->initialize($uri, $headers, $body);
   }
 }

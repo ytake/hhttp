@@ -24,6 +24,7 @@ use type Facebook\Experimental\Http\Message\UriInterface;
 
 use namespace Ytake\Hungrr\Exception;
 use namespace HH\Lib\Str;
+use namespace HH\Lib\Experimental\IO;
 
 use function is_object;
 use function get_class;
@@ -32,20 +33,13 @@ use function gettype;
 class RedirectResponse extends Response {
 
   public function __construct(
-    mixed $uri,
+    UriInterface $uri,
     StatusCode $status = StatusCode::FOUND,
     dict<string, vec<string>> $headers = dict[]
   ) {
-    if(!$uri is string && !$uri is UriInterface) {
-      throw new Exception\InvalidArgumentException(Str\format(
-        'Uri provided to %s MUST be a string or Facebook\Experimental\Http\Message\UriInterface instance; received "%s"',
-        __CLASS__,
-        (is_object($uri) ? get_class($uri) : gettype($uri))
-      ));
-    }
     $headers['location'] = vec[(string) $uri];
     parent::__construct(
-      '',
+      IO\request_input(),
       $status,
       $headers,
     );

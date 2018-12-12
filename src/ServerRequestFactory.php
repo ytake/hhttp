@@ -18,8 +18,9 @@
 
 namespace Ytake\Hungrr;
 
-use namespace Facebook\Experimental\Http\Message;
 use namespace HH\Lib\C;
+use namespace HH\Lib\Experimental\IO;
+use namespace Facebook\Experimental\Http\Message;
 
 class ServerRequestFactory {
 
@@ -29,10 +30,10 @@ class ServerRequestFactory {
     dict<string, string> $server_params = dict[],
   ): Message\ServerRequestInterface {
     return new ServerRequest(
-      $uri,
       $method,
+      $uri,
+      IO\request_input(),
       dict[],
-      '',
       '1.1',
       $server_params
     );
@@ -53,10 +54,10 @@ class ServerRequestFactory {
     /* HH_FIXME[2050] */
     $cookies = (C\count($cookie) === 0) ? dict($_COOKIE) : $cookie;
     $request = new ServerRequest(
-      new Uri($serverParams['REQUEST_URI'] ?? ''),
       Message\HTTPMethod::assert($serverParams['REQUEST_METHOD'] ?? Message\HTTPMethod::GET),
+      new Uri($serverParams['REQUEST_URI'] ?? ''),
+      IO\request_input(),
       dict[],
-      '',
       '1.1',
       $serverParams
     );

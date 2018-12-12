@@ -23,6 +23,8 @@ use type Ytake\Hungrr\StatusCode;
 
 use namespace Ytake\Hungrr\Exception;
 use namespace HH\Lib\Str;
+use namespace HH\Lib\Experimental\IO;
+
 use const JSON_ERROR_NONE;
 
 use function json_encode;
