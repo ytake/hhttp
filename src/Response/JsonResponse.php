@@ -43,8 +43,12 @@ class JsonResponse extends Response {
     dict<string, vec<string>> $headers = dict[],
     protected int $encodingOptions = self::DEFAULT_JSON_FLAGS
   ) {
-    parent::__construct(
+    list($read, $write) = IO\pipe_non_disposable();
+    $write->rawWriteBlocking(
       $this->jsonEncode($payload, $this->encodingOptions),
+    );
+    parent::__construct(
+      $write,
       $status,
       /* HH_FIXME[3004] */
       $this->injectContentType('application/json', $headers),

@@ -35,8 +35,7 @@ trait RequestTrait {
   private Message\HTTPMethod $method;
   private ?string $requestTarget;
   private UriInterface $uri;
-  private ?IO\ReadHandle $readHandle;
-  private ?IO\WriteHandle $writeHandle;
+  private IO\ReadHandle $readHandle;
 
   private function initialize(
     dict<string, vec<string>> $headers = dict[],

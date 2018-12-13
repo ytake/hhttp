@@ -36,7 +36,7 @@ class ServerRequest implements ServerRequestInterface {
   public function __construct(
     private Message\HTTPMethod $method,
     private Message\UriInterface $uri,
-    private IO\ReadHandle $body,
+    private IO\ReadHandle $readHandle,
     dict<string, vec<string>> $headers = dict[],
     string $protocol = '1.1',
     protected dict<string, string> $serverParams = dict[]
