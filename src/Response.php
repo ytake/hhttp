@@ -136,10 +136,4 @@ class Response implements ResponseInterface {
     $new->body = $body;
     return $new;
   }
-
-  public function readBody(): IO\ReadHandle {
-    $rh = $this->body;
-    invariant($rh is IO\ReadHandle, "handler error.");
-    return $rh;
-  }
 }

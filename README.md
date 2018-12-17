@@ -39,12 +39,12 @@ $request = ServerRequestFactory::fromGlobals();
 Constructor Detail
 
 ```text
-public function __construct(
-  ImmMap<mixed, mixed> $payload,
-  Ytake\Hungrr\StatusCode $status,
-  dict<string, vec<string>> $headers,
-  int $encodingOptions
-)
+  public function __construct(
+    private \HH\Lib\Experimental\IO\WriteHandle $body,
+    StatusCode $status = StatusCode::OK,
+    dict<string, vec<string>> $headers = dict[],
+    protected int $encodingOptions = self::DEFAULT_JSON_FLAGS
+  )
 ```
 
 Example
@@ -55,12 +55,14 @@ Example
 use type Ytake\Hungrr\Uri;
 use type Ytake\Hungrr\StatusCode;
 use type Ytake\Hungrr\Response\RedirectResponse;
+use namespace HH\Lib\Experimental\IO;
 
-$r = new JsonResponse(new ImmMap([
-  'json_encode' => ImmMap{
+list($read, $write) = IO\pipe_non_disposable();
+await $write->writeAsync(\json_encode(new ImmMap([
+  'testing' => ImmMap{
     'HHVM' => 'Hack'
   }
-]));
+])));
 ```
 
 ### Redirect Response

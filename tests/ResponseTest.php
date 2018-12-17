@@ -10,14 +10,16 @@ use function Facebook\FBExpect\expect;
 
 final class ResponseTest extends HackTest {
 
-  public function testDefaultConstructor(): void {
-    list($_, $write) = IO\pipe_non_disposable();
+  public async function testDefaultConstructor(): Awaitable<void> {
+    list($read, $write) = IO\pipe_non_disposable();
     $r = new Response($write);
     expect($r->getStatusCode())->toBeSame(200);
     expect($r->getProtocolVersion())->toBeSame('1.1');
     expect($r->getReasonPhrase())->toBeSame('OK');
     expect($r->getHeaders())->toBeSame(dict[]);
-    expect($r->readBody()->rawReadBlocking())->toBeSame('');
+    await $r->getBody()->closeAsync();
+    $re = await $read->readAsync();
+    expect($re)->toBeSame('');
   }
 
   public function testCanConstructWithStatusCode(): void {
@@ -45,27 +47,33 @@ final class ResponseTest extends HackTest {
     expect($r->getHeader('Foo'))->toBeSame(vec['Bar']);
   }
 
-  public function testCanConstructWithBody(): void {
-    list($_, $write) = IO\pipe_non_disposable();
-    $write->rawWriteBlocking('baz');
+  public async function testCanConstructWithBody(): Awaitable<void> {
+    list($read, $write) = IO\pipe_non_disposable();
+    await $write->writeAsync('baz');
     $r = new Response($write, StatusCode::OK, dict[]);
     expect($r->getBody())->toBeInstanceOf(IO\ReadHandle::class);
-    expect($r->readBody()->rawReadBlocking())->toBeSame('baz');
+    await $r->getBody()->closeAsync();
+    $re = await $read->readAsync();
+    expect($re)->toBeSame('baz');
   }
 
-  public function testNullBody(): void {
-    list($_, $write) = IO\pipe_non_disposable();
+  public async function testNullBody(): Awaitable<void> {
+    list($read, $write) = IO\pipe_non_disposable();
     $r = new Response($write, StatusCode::OK, dict[]);
     expect($r->getBody())->toBeInstanceOf(IO\ReadHandle::class);
-    expect($r->readBody()->rawReadBlocking())->toBeSame('');
+    await $r->getBody()->closeAsync();
+    $re = await $read->readAsync();
+    expect($re)->toBeSame('');
   }
 
-  public function testFalseyBody(): void {
-    list($_, $write) = IO\pipe_non_disposable();
-    $write->rawWriteBlocking('0');
+  public async function testFalseyBody(): Awaitable<void> {
+    list($read, $write) = IO\pipe_non_disposable();
+    await $write->writeAsync('0');
     $r = new Response($write, StatusCode::OK, dict[]);
     expect($r->getBody())->toBeInstanceOf(IO\ReadHandle::class);
-    expect($r->readBody()->rawReadBlocking())->toBeSame('0');
+    await $r->getBody()->closeAsync();
+    $re = await $read->readAsync();
+    expect($re)->toBeSame('0');
   }
 
   public function testCanConstructWithReason(): void {
@@ -111,12 +119,14 @@ final class ResponseTest extends HackTest {
     expect($r->withProtocolVersion('1.1'))->toBeSame($r);
   }
 
-  public function testWithBody(): void {
-    list($_, $write) = IO\pipe_non_disposable();
-    $write->rawWriteBlocking('testing');
+  public async function testWithBody(): Awaitable<void> {
+    list($read, $write) = IO\pipe_non_disposable();
+    await $write->writeAsync('testing');
     $r = new Response($write);
     expect($r->getBody())->toBeInstanceOf(IO\ReadHandle::class);
-    expect($r->readBody()->rawReadBlocking())->toBeSame('testing');
+    await $r->getBody()->closeAsync();
+    $re = await $read->readAsync();
+    expect($re)->toBeSame('testing');
   }
 
   public function testWithHeader(): void {
