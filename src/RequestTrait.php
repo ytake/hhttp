@@ -29,29 +29,21 @@ use namespace HH\Lib\Regex;
 use function array_key_exists;
 
 trait RequestTrait {
-  use MessageTrait, IOTrait;
+  use MessageTrait;
   require implements RequestInterface;
 
   private Message\HTTPMethod $method;
   private ?string $requestTarget;
-  protected ?UriInterface $uri;
+  private UriInterface $uri;
+  private IO\ReadHandle $readHandle;
 
   private function initialize(
-    mixed $uri,
     dict<string, vec<string>> $headers = dict[],
-    string $body = '',
   ): void {
-    if ($uri is string) {
-      $uri = new Uri($uri);
-    }
-    invariant($uri is UriInterface, "\$uri, not implements UriInterface");
-    $this->uri = $uri;
     $this->setHeaders($headers);
     if (!$this->hasHeader('Host')) {
       $this->updateHostFromUri();
     }
-    $this->createIO();
-    $this->setBody($body);
   }
 
   private function createUri(mixed $uri): UriInterface {

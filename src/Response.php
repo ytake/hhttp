@@ -23,7 +23,7 @@ use type Facebook\Experimental\Http\Message\ResponseInterface;
 use namespace HH\Lib\Experimental\IO;
 
 class Response implements ResponseInterface {
-  use MessageTrait, IOTrait;
+  use MessageTrait;
 
   private ImmMap<StatusCode, string> $phrases = ImmMap{
     StatusCode::CONTINUE => 'Continue',
@@ -91,15 +91,13 @@ class Response implements ResponseInterface {
   };
 
   public function __construct(
-    string $body = '',
+    private IO\WriteHandle $body,
     private StatusCode $status = StatusCode::OK,
     dict<string, vec<string>> $headers = dict[],
     private string $protocol = '1.1',
     protected string $reason = ''
   ) {
     $this->setHeaders($headers);
-    $this->createIO();
-    $this->getBody()->rawWriteBlocking($body);
     if ($this->phrases->contains($status)) {
       $this->reason = $this->phrases->at($status);
     }
@@ -130,20 +128,12 @@ class Response implements ResponseInterface {
   }
 
   public function getBody(): IO\WriteHandle {
-    $wh = $this->writeHandle;
-    invariant($wh is IO\WriteHandle, "handler error.");
-    return $wh;
+    return $this->body;
   }
 
   public function withBody(IO\WriteHandle $body): this {
     $new = clone $this;
-    $new->writeHandle = $body;
+    $new->body = $body;
     return $new;
-  }
-
-  public function readBody(): IO\ReadHandle {
-    $rh = $this->readHandle;
-    invariant($rh is IO\ReadHandle, "handler error.");
-    return $rh;
   }
 }

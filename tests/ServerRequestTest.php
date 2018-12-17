@@ -1,8 +1,9 @@
 <?hh // strict
 
+use type Ytake\Hungrr\Uri;
 use type Ytake\Hungrr\ServerRequest;
 use type Facebook\HackTest\HackTest;
-
+use namespace HH\Lib\Experimental\IO;
 use namespace Facebook\Experimental\Http\Message;
 use function Facebook\FBExpect\expect;
 
@@ -10,11 +11,12 @@ final class ServerRequestTest extends HackTest {
 
   public function testShouldBeSameServerParams(): void {
     $params = dict['name' => 'value'];
+    list($r, $w) = IO\pipe_non_disposable();
     $request = new ServerRequest(
-      '/',
       Message\HTTPMethod::GET,
+      new Uri('/'),
+      $r,
       dict[],
-      'baz',
       '1.1',
       $params
     );
@@ -22,7 +24,7 @@ final class ServerRequestTest extends HackTest {
   }
 
   public function testShouldBeSameQueryParams(): void {
-    $request = new ServerRequest('/', Message\HTTPMethod::GET);
+    $request = new ServerRequest(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
     $params = dict['name' => 'value'];
     $request2 = $request->withQueryParams($params);
     expect($request)->toNotBeSame($request2);
@@ -31,7 +33,7 @@ final class ServerRequestTest extends HackTest {
   }
 
   public function testShouldBeSameCookieParams(): void {
-    $request = new ServerRequest('/');
+    $request = new ServerRequest(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
     $params = dict['name' => 'value'];
     $request2 = $request->withCookieParams($params);
     expect($request)->toNotBeSame($request2);
@@ -40,7 +42,7 @@ final class ServerRequestTest extends HackTest {
   }
 
   public function testShouldBeSameParsedBody(): void {
-    $request = new ServerRequest('/');
+    $request = new ServerRequest(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
     $params = dict['name' => 'value'];
     $request2 = $request->withParsedBody($params);
     expect($request)->toNotBeSame($request2);

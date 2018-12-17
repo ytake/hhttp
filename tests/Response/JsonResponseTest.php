@@ -3,39 +3,50 @@
 use type Ytake\Hungrr\Response\JsonResponse;
 use type Ytake\Hungrr\StatusCode;
 use type Facebook\HackTest\HackTest;
+use namespace HH\Lib\Experimental\IO;
 use function Facebook\FBExpect\expect;
 
 final class JsonResponseTest extends HackTest {
 
-  public function testShouldReturnEmptyJsonBody(): void {
-    $r = new JsonResponse(new ImmMap([]));
+  public async function testShouldReturnEmptyJsonBody(): Awaitable<void> {
+    list($read, $write) = IO\pipe_non_disposable();
+    $r = new JsonResponse($write);
+    await $write->writeAsync(\json_encode(new ImmMap([])));
     expect($r->getStatusCode())->toBeSame(200);
     expect($r->getProtocolVersion())->toBeSame('1.1');
     expect($r->getReasonPhrase())->toBeSame('OK');
     expect($r->getHeaders())->toBeSame(dict[
       'content-type' => vec['application/json'],
     ]);
-    expect($r->readBody()->rawReadBlocking())->toBeSame('{}');
+    await $r->getBody()->closeAsync();
+    $re = await $read->readAsync();
+    expect($re)->toBeSame('{}');
   }
 
-  public function testShouldReturnJsonBody(): void {
-    $r = new JsonResponse(new ImmMap([
+  public async function testShouldReturnJsonBody(): Awaitable<void> {
+    list($read, $write) = IO\pipe_non_disposable();
+    await $write->writeAsync(\json_encode(new ImmMap([
       'testing' => ImmMap{
         'HHVM' => 'Hack'
       }
-    ]));
+    ])));
+    $r = new JsonResponse($write);
     expect($r->getStatusCode())->toBeSame(200);
     expect($r->getProtocolVersion())->toBeSame('1.1');
     expect($r->getReasonPhrase())->toBeSame('OK');
     expect($r->getHeaders())->toBeSame(dict[
       'content-type' => vec['application/json'],
     ]);
-    expect($r->readBody()->rawReadBlocking())->toBeSame('{"testing":{"HHVM":"Hack"}}');
+    await $r->getBody()->closeAsync();
+    $re = await $read->readAsync();
+    expect($re)->toBeSame('{"testing":{"HHVM":"Hack"}}');
   }
 
-  public function testShouldReturnAppendHeaders(): void {
+  public async function testShouldReturnAppendHeaders(): Awaitable<void> {
+    list($read, $write) = IO\pipe_non_disposable();
+    await $write->writeAsync(\json_encode(new ImmMap(['testing' => ImmMap{'HHVM' => 'Hack'}])));
     $r = new JsonResponse(
-      new ImmMap(['testing' => ImmMap{'HHVM' => 'Hack'}]),
+      $write,
       StatusCode::ACCEPTED,
       dict['X-App_Message' => vec['testing.'],
       'content-type' => vec['application/hal+json']]
@@ -47,6 +58,8 @@ final class JsonResponseTest extends HackTest {
       'X-App_Message' => vec['testing.'],
       'content-type' => vec['application/hal+json'],
     ]);
-    expect($r->readBody()->rawReadBlocking())->toBeSame('{"testing":{"HHVM":"Hack"}}');
+    await $r->getBody()->closeAsync();
+    $re = await $read->readAsync();
+    expect($re)->toBeSame('{"testing":{"HHVM":"Hack"}}');
   }
 }

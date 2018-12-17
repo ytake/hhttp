@@ -22,6 +22,7 @@ use type Facebook\Experimental\Http\Message\ServerRequestInterface;
 use type Facebook\Experimental\Http\Message\UploadedFileInterface;
 
 use namespace Facebook\Experimental\Http\Message;
+use namespace HH\Lib\Experimental\IO;
 
 class ServerRequest implements ServerRequestInterface {
 
@@ -33,16 +34,15 @@ class ServerRequest implements ServerRequestInterface {
   private dict<string, string> $parsedBody = dict[];
 
   public function __construct(
-    mixed $uri,
-    Message\HTTPMethod $method = Message\HTTPMethod::GET,
+    private Message\HTTPMethod $method,
+    private Message\UriInterface $uri,
+    private IO\ReadHandle $readHandle,
     dict<string, vec<string>> $headers = dict[],
-    string $body = '',
     string $protocol = '1.1',
     protected dict<string, string> $serverParams = dict[]
   ) {
     $this->protocol = $protocol;
-    $this->method = $method;
-    $this->initialize($uri, $headers, $body);
+    $this->initialize($headers);
   }
 
   public function getServerParams(): dict<string, string> {
