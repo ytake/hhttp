@@ -1,6 +1,5 @@
 <?hh // strict
 
-use type Ytake\Hungrr\Uri;
 use type Ytake\Hungrr\Response;
 use type Ytake\Hungrr\StatusCode;
 use type Facebook\HackTest\HackTest;

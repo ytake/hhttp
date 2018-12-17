@@ -21,15 +21,10 @@ namespace Ytake\Hungrr\Response;
 use type Ytake\Hungrr\Response;
 use type Ytake\Hungrr\StatusCode;
 
-use namespace Ytake\Hungrr\Exception;
-use namespace HH\Lib\Str;
 use namespace HH\Lib\Experimental\IO;
 
 use const JSON_ERROR_NONE;
 
-use function json_encode;
-use function json_last_error;
-use function json_last_error_msg;
 
 class JsonResponse extends Response {
   use InjectContentTypeTrait;

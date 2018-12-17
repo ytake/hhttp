@@ -4,7 +4,6 @@ use type Ytake\Hungrr\Uri;
 use type Ytake\Hungrr\Response\RedirectResponse;
 use type Facebook\HackTest\HackTest;
 
-use namespace Ytake\Hungrr\Exception;
 use function Facebook\FBExpect\expect;
 
 final class RedirectResponseTest extends HackTest {

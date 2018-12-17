@@ -22,13 +22,8 @@ use type Ytake\Hungrr\Response;
 use type Ytake\Hungrr\StatusCode;
 use type Facebook\Experimental\Http\Message\UriInterface;
 
-use namespace Ytake\Hungrr\Exception;
-use namespace HH\Lib\Str;
 use namespace HH\Lib\Experimental\IO;
 
-use function is_object;
-use function get_class;
-use function gettype;
 
 class RedirectResponse extends Response {
 

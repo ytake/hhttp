@@ -27,7 +27,7 @@
   "require-dev": {
     "hhvm/hacktest": "^1.0",
     "facebook/fbexpect": "^2.2.0",
-    "hhvm/hhast": "^3.29.0"
+    "hhvm/hhast": "3.29.0"
   },
   "autoload": {
     "psr-4": {

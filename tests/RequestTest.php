@@ -128,7 +128,7 @@ final class RequestTest extends HackTest {
     list($r, $w) = IO\pipe_non_disposable();
     $w->rawWriteBlocking('testing');
     $re = new Request(
-      Message\HTTPMethod::GET, 
+      Message\HTTPMethod::GET,
       new Uri('http://foo.com/baz?bar=bam'),
       $r,
       dict['Host' => vec['a.com']]
@@ -153,7 +153,7 @@ final class RequestTest extends HackTest {
     list($r, $w) = IO\pipe_non_disposable();
     $w->rawWriteBlocking('testing');
     $re = new Request(
-      Message\HTTPMethod::GET, 
+      Message\HTTPMethod::GET,
       new Uri(''),
       $r,
       dict[
@@ -168,7 +168,7 @@ final class RequestTest extends HackTest {
     list($r, $w) = IO\pipe_non_disposable();
     $w->rawWriteBlocking('testing');
     $re = new Request(
-      Message\HTTPMethod::GET, 
+      Message\HTTPMethod::GET,
       new Uri(''),
       $r,
       dict[
@@ -180,7 +180,7 @@ final class RequestTest extends HackTest {
 
   public function testAddsPortToHeader(): void {
     $r = new Request(
-      Message\HTTPMethod::GET, 
+      Message\HTTPMethod::GET,
       new Uri('http://foo.com:8124/bar'),
       IO\request_input(),
     );
@@ -189,7 +189,7 @@ final class RequestTest extends HackTest {
 
   public function testAddsPortToHeaderAndReplacePreviousPort(): void {
     $r = new Request(
-      Message\HTTPMethod::GET, 
+      Message\HTTPMethod::GET,
       new Uri('http://foo.com:8124/bar'),
       IO\request_input(),
     );
@@ -200,7 +200,7 @@ final class RequestTest extends HackTest {
   <<ExpectedException(\InvalidArgumentException::class), ExpectedExceptionMessage('Header name must be an RFC 7230 compatible string.')>>
   public function testCannotHaveHeaderWithEmptyName(): void {
     $r = new Request(
-      Message\HTTPMethod::GET, 
+      Message\HTTPMethod::GET,
       new Uri('https://example.com/'),
       IO\request_input(),
     );
@@ -209,7 +209,7 @@ final class RequestTest extends HackTest {
 
   public function testCanHaveHeaderWithEmptyValue(): void {
     $r = new Request(
-      Message\HTTPMethod::GET, 
+      Message\HTTPMethod::GET,
       new Uri('https://example.com/'),
       IO\request_input(),
     );
