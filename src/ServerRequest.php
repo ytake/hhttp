@@ -45,6 +45,7 @@ class ServerRequest implements ServerRequestInterface {
     $this->initialize($headers);
   }
 
+  <<__Rx>>
   public function getServerParams(): dict<string, string> {
     return $this->serverParams;
   }
@@ -55,6 +56,7 @@ class ServerRequest implements ServerRequestInterface {
     return $new;
   }
 
+  <<__Rx>>
   public function getCookieParams(): dict<string, string> {
     return $this->cookieParams;
   }
@@ -65,6 +67,7 @@ class ServerRequest implements ServerRequestInterface {
     return $new;
   }
 
+  <<__Rx>>
   public function getQueryParams(): dict<string, string> {
     return $this->queryParams;
   }
@@ -75,6 +78,7 @@ class ServerRequest implements ServerRequestInterface {
     return $new;
   }
 
+  <<__Rx>>
   public function getUploadedFiles(): dict<string, UploadedFileInterface> {
     return $this->uploadedFiles;
   }
@@ -87,6 +91,7 @@ class ServerRequest implements ServerRequestInterface {
     return $new;
   }
 
+  <<__Rx>>
   public function getParsedBody(): dict<string, string> {
     return $this->parsedBody;
   }

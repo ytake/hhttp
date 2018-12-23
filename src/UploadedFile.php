@@ -83,14 +83,17 @@ class UploadedFile implements Message\UploadedFileInterface {
     return $this->open($this->filename)->getSize();
   }
 
+  <<__Rx>>
   public function getError(): ?Message\UploadedFileError {
     return $this->error;
   }
 
+  <<__Rx>>
   public function getClientFilename(): string {
     return $this->clientFilename;
   }
 
+  <<__Rx>>
   public function getClientMediaType(): string {
     return $this->clientMediaType;
   }

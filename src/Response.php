@@ -106,10 +106,12 @@ class Response implements ResponseInterface {
     }
   }
 
+  <<__Rx>>
   public function getStatusCode(): int {
     return $this->status;
   }
 
+  <<__Rx>>
   public function getReasonPhrase(): string {
     return $this->reason;
   }
@@ -127,6 +129,7 @@ class Response implements ResponseInterface {
     return $new;
   }
 
+  <<__Rx>>
   public function getBody(): IO\WriteHandle {
     return $this->body;
   }

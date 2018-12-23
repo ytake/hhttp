@@ -40,6 +40,7 @@ class ServerRequestFactory {
   }
 
   public static function fromGlobals(
+    IO\ReadHandle $readHandle = IO\request_input(),
     dict<string, string> $server = dict[],
     dict<string, string> $post = dict[],
     dict<string, string> $query = dict[],
@@ -56,7 +57,7 @@ class ServerRequestFactory {
     $request = new ServerRequest(
       Message\HTTPMethod::assert($serverParams['REQUEST_METHOD'] ?? Message\HTTPMethod::GET),
       new Uri($serverParams['REQUEST_URI'] ?? ''),
-      IO\request_input(),
+      $readHandle,
       dict[],
       '1.1',
       $serverParams
