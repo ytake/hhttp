@@ -23,7 +23,7 @@ use type Facebook\Experimental\Http\Message\UriInterface;
 use namespace Ytake\Hungrr\Exception;
 use namespace HH\Lib\{Str, C, Dict};
 use function preg_replace_callback;
-use function array_key_exists;
+use function http_build_query;
 use function rawurlencode;
 use function parse_str;
 
@@ -264,7 +264,7 @@ final class Uri implements UriInterface {
         if ('' !== $authority) {
           $path = '/'.$path;
         }
-      } elseif (array_key_exists(1, $chunked) && '/' === $chunked[1]) {
+      } elseif (C\contains_key($chunked, 1) && '/' === $chunked[1]) {
         if ('' === $authority) {
           $path = '/'.Str\trim_left($path, '/');
         }
@@ -276,7 +276,7 @@ final class Uri implements UriInterface {
     parse_str($rawQuery, &$out);
     $mergeQuery = Dict\merge($query, dict($out));
     if(C\count($mergeQuery)) {
-      $uri .= '?'. \http_build_query($mergeQuery);
+      $uri .= '?'. http_build_query($mergeQuery);
     }
     if ('' !== $fragment) {
       $uri .= '#'.$fragment;

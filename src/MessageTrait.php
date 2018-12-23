@@ -19,7 +19,6 @@
 namespace Ytake\Hungrr;
 
 use namespace HH\Lib\{Str, Regex, Vec, C, Dict};
-use function array_key_exists;
 
 trait MessageTrait {
 
@@ -29,8 +28,8 @@ trait MessageTrait {
   private string $protocol = '1.1';
 
   protected function extractHeaders(string $header, vec<string> $value): void {
-    $nh = Str\lowercase($header);
-    if (array_key_exists($nh, $this->headerNames)) {
+    $nh = $this->lowHeader($header);
+    if (C\contains_key($this->headerNames, $nh)) {
       $header = $this->headerNames[$nh];
       $this->headers[$header] =  Vec\concat($this->headers[$header], $value);
       return;
@@ -65,6 +64,7 @@ trait MessageTrait {
     });
   }
 
+  <<__Rx>>
   public function getProtocolVersion(): string {
     return $this->protocol;
   }
@@ -78,17 +78,18 @@ trait MessageTrait {
     return $new;
   }
 
+  <<__Rx>>
   public function getHeaders(): dict<string, vec<string>> {
     return $this->headers;
   }
 
   public function hasHeader(string $header): bool {
-    return array_key_exists(Str\lowercase($header), $this->headerNames);
+    return C\contains_key($this->headerNames, $this->lowHeader($header));
   }
 
   public function getHeader(string $header): vec<string> {
-    $lowHeader = Str\lowercase($header);
-    if (!array_key_exists($lowHeader, $this->headerNames)) {
+    $lowHeader = $this->lowHeader($header);
+    if (!C\contains_key($this->headerNames, $lowHeader)) {
       return vec[];
     }
     return $this->headers[$this->headerNames[$lowHeader]];
@@ -99,9 +100,9 @@ trait MessageTrait {
   }
 
   public function withHeader(string $header, vec<string> $value): this {
-    $lowHeader = Str\lowercase($header);
+    $lowHeader = $this->lowHeader($header);
     $new = clone $this;
-    if (array_key_exists($lowHeader, $this->headerNames)) {
+    if (C\contains_key($this->headerNames, $lowHeader)) {
       $new->headers = Dict\filter_keys(
         $new->headers,
         ($k) ==> $k !== $this->headerNames[$lowHeader]
@@ -130,8 +131,8 @@ trait MessageTrait {
   }
 
   public function withoutHeader(string $header): this {
-    $lowHeader = Str\lowercase($header);
-    if (!array_key_exists($lowHeader, $this->headerNames)) {
+    $lowHeader = $this->lowHeader($header);
+    if (!C\contains_key($this->headerNames, $lowHeader)) {
       return $this;
     }
     $header = $this->headerNames[$lowHeader];
@@ -151,5 +152,10 @@ trait MessageTrait {
       }
       return Str\trim($r, " \t");
     });
+  }
+
+  <<__Memoize>>
+  private function lowHeader(string $header): string {
+    return Str\lowercase($header);
   }
 }

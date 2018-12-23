@@ -24,9 +24,8 @@ use type Facebook\Experimental\Http\Message\RequestURIOptions;
 
 use namespace HH\Lib\Experimental\IO;
 use namespace Facebook\Experimental\Http\Message;
-use namespace HH\Lib\Regex;
+use namespace HH\Lib\{Regex, C};
 
-use function array_key_exists;
 
 trait RequestTrait {
   use MessageTrait;
@@ -46,28 +45,11 @@ trait RequestTrait {
     }
   }
 
-  private function createUri(mixed $uri): UriInterface {
-    if ($uri is UriInterface) {
-      return $uri;
-    }
-    if ($uri is string) {
-      return new Uri($uri);
-    }
-    if ($uri === null) {
-      return new Uri();
-    }
-    throw new Exception\InvalidArgumentException(
-      'Invalid URI provided; must be null, a string, or a Psr\Http\Message\UriInterface instance'
-    );
-  }
-
   private function getHostFromUri(): string {
     $uri = $this->uri;
     $host = '';
-    if ($uri is UriInterface) {
-      $host  = $uri->getHost();
-      $host .= ($uri->getPort() is nonnull) ? ':' . $uri->getPort() : '';
-    }
+    $host  = $uri->getHost();
+    $host .= ($uri->getPort() is nonnull) ? ':' . $uri->getPort() : '';
     return $host;
   }
 
@@ -77,13 +59,11 @@ trait RequestTrait {
     }
     $target = '';
     $uri = $this->uri;
-    if ($uri is UriInterface) {
-      if ('' === $target = $uri->getPath()) {
-        $target = '/';
-      }
-      if ('' !== $uri->getRawQuery()) {
-        $target .= '?'. $uri->getRawQuery();
-      }
+    if ('' === $target = $uri->getPath()) {
+      $target = '/';
+    }
+    if ('' !== $uri->getRawQuery()) {
+      $target .= '?'. $uri->getRawQuery();
     }
     return $target;
   }
@@ -110,7 +90,6 @@ trait RequestTrait {
 
   <<__Rx>>
   public function getUri(): UriInterface {
-    invariant($this->uri is UriInterface, "type error.");
     return $this->uri;
   }
 
@@ -131,23 +110,21 @@ trait RequestTrait {
 
   private function updateHostFromUri(): void {
     $uri = $this->uri;
-    invariant($uri is UriInterface, "type error.");
     if ('' === $host = $uri->getHost()) {
       return;
     }
     if (null !== ($port = $uri->getPort())) {
       $host .= ':'.$port;
     }
-    if (!array_key_exists('host', $this->headerNames)) {
+    if (!C\contains_key($this->headerNames, 'host')) {
       $this->headerNames['host'] = 'Host';
     }
     $this->headers[$this->headerNames['host']] = vec[$host];
   }
 
+  <<__Rx>>
   public function getBody(): IO\ReadHandle {
-    $rh = $this->readHandle;
-    invariant($rh is IO\ReadHandle, "handle error.");
-    return $rh;
+    return $this->readHandle;
   }
 
   public function withBody(IO\ReadHandle $body): this {
