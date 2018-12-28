@@ -19,7 +19,6 @@
 namespace Ytake\Hungrr;
 
 use type Facebook\Experimental\Http\Message\RequestInterface;
-
 use namespace Facebook\Experimental\Http\Message;
 use namespace HH\Lib\Experimental\IO;
 

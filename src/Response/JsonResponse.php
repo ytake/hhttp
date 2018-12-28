@@ -20,11 +20,8 @@ namespace Ytake\Hungrr\Response;
 
 use type Ytake\Hungrr\Response;
 use type Ytake\Hungrr\StatusCode;
-
 use namespace HH\Lib\Experimental\IO;
-
 use const JSON_ERROR_NONE;
-
 
 class JsonResponse extends Response {
   use InjectContentTypeTrait;

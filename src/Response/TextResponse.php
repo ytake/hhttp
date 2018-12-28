@@ -20,7 +20,6 @@ namespace Ytake\Hungrr\Response;
 
 use type Ytake\Hungrr\Response;
 use type Ytake\Hungrr\StatusCode;
-
 use namespace HH\Lib\Experimental\IO;
 
 class TextResponse extends Response {

@@ -19,7 +19,6 @@
 namespace Ytake\Hungrr;
 
 use type Facebook\Experimental\Http\Message\UriInterface;
-
 use namespace Ytake\Hungrr\Exception;
 use namespace HH\Lib\{Str, C, Dict};
 use function preg_replace_callback;

@@ -20,7 +20,6 @@ namespace Ytake\Hungrr;
 
 use type Facebook\Experimental\Http\Message\ServerRequestInterface;
 use type Facebook\Experimental\Http\Message\UploadedFileInterface;
-
 use namespace Facebook\Experimental\Http\Message;
 use namespace HH\Lib\Experimental\IO;
 
