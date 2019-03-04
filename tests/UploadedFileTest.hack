@@ -1,5 +1,3 @@
-<?hh // strict
-
 use type Ytake\Hungrr\UploadedFile;
 use type Facebook\HackTest\HackTest;
 use namespace Ytake\Hungrr\Exception;
@@ -37,21 +35,21 @@ final class UploadedFileTest extends HackTest {
     expect($tf)->toBeSame($ff);
   }
 
-  <<ExpectedException(Exception\PathNotFoundException::class)>>
   public function testMoveCannotBeCalledMoreThanOnce(): void {
     $this->files[] = $from = tempnam(sys_get_temp_dir(), 'copy_from');
     $upload = new UploadedFile($from);
     $this->files[] = $to = tempnam(sys_get_temp_dir(), 'diac');
     $upload->moveTo($to);
     expect(file_exists($to))->toBeTrue();
-    $upload->moveTo($to);
+    expect(() ==> $upload->moveTo($to))
+      ->toThrow(Exception\PathNotFoundException::class);
   }
 
-  <<ExpectedException(Exception\UploadedFileException::class)>>
   public function testShouldThrow(): void {
     $this->files[] = $from = tempnam(sys_get_temp_dir(), 'copy_from');
     $upload = new UploadedFile($from, Message\UploadedFileError::ERROR_NO_FILE);
     $this->files[] = $to = tempnam(sys_get_temp_dir(), 'diac');
-    $upload->moveTo($to);
+    expect(() ==> $upload->moveTo($to))
+      ->toThrow(Exception\UploadedFileException::class);
   }
 }

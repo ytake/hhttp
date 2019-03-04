@@ -1,5 +1,3 @@
-<?hh // strict
-
 use type Ytake\Hungrr\Response\JsonResponse;
 use type Ytake\Hungrr\StatusCode;
 use type Facebook\HackTest\HackTest;

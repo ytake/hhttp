@@ -1,5 +1,3 @@
-<?hh // strict
-
 /**
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -12,7 +10,7 @@
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license.
  *
- * Copyright (c) 2018 Yuuki Takezawa
+ * Copyright (c) 2018-2019 Yuuki Takezawa
  *
  */
 
@@ -21,29 +19,20 @@ namespace Ytake\Hungrr\Response;
 use type Ytake\Hungrr\Response;
 use type Ytake\Hungrr\StatusCode;
 use namespace HH\Lib\Experimental\IO;
-use const JSON_ERROR_NONE;
 
-class JsonResponse extends Response {
+class HtmlResponse extends Response {
   use InjectContentTypeTrait;
-
-  // JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES
-  const int DEFAULT_JSON_FLAGS = 79;
 
   public function __construct(
     private IO\WriteHandle $body,
     StatusCode $status = StatusCode::OK,
-    dict<string, vec<string>> $headers = dict[],
-    protected int $encodingOptions = self::DEFAULT_JSON_FLAGS
+    dict<string, vec<string>> $headers = dict[]
   ) {
     parent::__construct(
       $body,
       $status,
       /* HH_FIXME[3004] */
-      $this->injectContentType('application/json', $headers),
+      $this->injectContentType('text/html; charset=utf-8', $headers),
     );
-  }
-
-  public function getEncodingOptions(): int {
-    return $this->encodingOptions;
   }
 }

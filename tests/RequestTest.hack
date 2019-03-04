@@ -1,5 +1,3 @@
-<?hh // strict
-
 use type Ytake\Hungrr\Uri;
 use type Ytake\Hungrr\Request;
 use type Facebook\HackTest\HackTest;
@@ -21,9 +19,10 @@ final class RequestTest extends HackTest {
     expect($r->getUri())->toBeSame($uri);
   }
 
-  <<ExpectedException(\InvalidArgumentException::class), ExpectedExceptionMessage('Unable to parse URI: ///')>>
   public function testValidateRequestUri(): void {
-    new Request(Message\HTTPMethod::GET, new Uri('///'), IO\request_input());
+    expect(() ==> {
+      new Request(Message\HTTPMethod::GET, new Uri('///'), IO\request_input());
+    })->toThrow(\InvalidArgumentException::class, 'Unable to parse URI: ///');
   }
 
   public function testCanConstructWithBody(): void {
@@ -71,10 +70,10 @@ final class RequestTest extends HackTest {
     expect($r1->getRequestTarget())->toBeSame('/');
   }
 
-  <<ExpectedException(\InvalidArgumentException::class), ExpectedExceptionMessage('Invalid request target provided; cannot contain whitespace')>>
   public function testRequestTargetDoesNotAllowSpaces(): void {
     $r1 = new Request(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
-    $r1->withRequestTarget('/foo bar');
+    expect(() ==> $r1->withRequestTarget('/foo bar'))
+      ->toThrow(\InvalidArgumentException::class, 'Invalid request target provided; cannot contain whitespace');
   }
 
   public function testRequestTargetDefaultsToSlash(): void {
@@ -197,14 +196,17 @@ final class RequestTest extends HackTest {
     expect($r->getHeaderLine('host'))->toBeSame('foo.com:8125');
   }
 
-  <<ExpectedException(\InvalidArgumentException::class), ExpectedExceptionMessage('Header name must be an RFC 7230 compatible string.')>>
   public function testCannotHaveHeaderWithEmptyName(): void {
     $r = new Request(
       Message\HTTPMethod::GET,
       new Uri('https://example.com/'),
       IO\request_input(),
     );
-    $r->withHeader('', vec['Bar']);
+    expect(() ==> $r->withHeader('', vec['Bar']))
+      ->toThrow(
+        \InvalidArgumentException::class,
+        'Header name must be an RFC 7230 compatible string.'
+      );
   }
 
   public function testCanHaveHeaderWithEmptyValue(): void {

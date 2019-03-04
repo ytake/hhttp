@@ -1,5 +1,3 @@
-<?hh // strict
-
 /**
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -12,29 +10,30 @@
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license.
  *
- * Copyright (c) 2018 Yuuki Takezawa
+ * Copyright (c) 2018-2019 Yuuki Takezawa
  *
  */
 
 namespace Ytake\Hungrr\Response;
 
 use type Ytake\Hungrr\Response;
-use type Ytake\Hungrr\StatusCode;
-use type Facebook\Experimental\Http\Message\UriInterface;
-use namespace HH\Lib\Experimental\IO;
+use namespace HH\Lib\{Vec, Str, C};
 
-class RedirectResponse extends Response {
+trait InjectContentTypeTrait {
+  require extends Response;
 
-  public function __construct(
-    UriInterface $uri,
-    StatusCode $status = StatusCode::FOUND,
-    dict<string, vec<string>> $headers = dict[]
-  ) {
-    $headers['location'] = vec[(string) $uri];
-    parent::__construct(
-      IO\request_output(),
-      $status,
-      $headers,
+  private function injectContentType(
+    string $contentType,
+    dict<string, vec<string>> $headers
+  ): dict<string, vec<string>> {
+    $hasContentType = C\reduce(
+      Vec\keys($headers),
+      ($carry, $item) ==> $carry ?: (Str\lowercase($item) === 'content-type'),
+      false
     );
+    if (!$hasContentType) {
+      $headers['content-type'] = vec[$contentType];
+    }
+    return $headers;
   }
 }

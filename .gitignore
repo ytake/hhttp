@@ -1,4 +1,6 @@
 composer.phar
 composer.lock
 vendor/
-.vscode/
+docker/
+docker-compose.yml
+.vscode

@@ -1,5 +1,3 @@
-<?hh // strict
-
 /**
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -12,30 +10,27 @@
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license.
  *
- * Copyright (c) 2018 Yuuki Takezawa
+ * Copyright (c) 2018-2019 Yuuki Takezawa
  *
  */
 
-namespace Ytake\Hungrr\Response;
+namespace Ytake\Hungrr;
 
-use type Ytake\Hungrr\Response;
-use namespace HH\Lib\{Vec, Str, C};
+use type Facebook\Experimental\Http\Message\RequestInterface;
+use namespace Facebook\Experimental\Http\Message;
+use namespace HH\Lib\Experimental\IO;
 
-trait InjectContentTypeTrait {
-  require extends Response;
+class Request implements RequestInterface {
+  use RequestTrait;
 
-  private function injectContentType(
-    string $contentType,
-    dict<string, vec<string>> $headers
-  ): dict<string, vec<string>> {
-    $hasContentType = C\reduce(
-      Vec\keys($headers),
-      ($carry, $item) ==> $carry ?: (Str\lowercase($item) === 'content-type'),
-      false
-    );
-    if (!$hasContentType) {
-      $headers['content-type'] = vec[$contentType];
-    }
-    return $headers;
+  public function __construct(
+    private Message\HTTPMethod $method,
+    private Message\UriInterface $uri,
+    private IO\ReadHandle $readHandle,
+    dict<string, vec<string>> $headers = dict[],
+    string $protocol = '1.1'
+  ) {
+    $this->initialize($headers);
+    $this->protocol = $protocol;
   }
 }

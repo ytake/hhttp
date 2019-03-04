@@ -1,5 +1,3 @@
-<?hh // strict
-
 /**
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -12,12 +10,29 @@
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the MIT license.
  *
- * Copyright (c) 2018 Yuuki Takezawa
+ * Copyright (c) 2018-2019 Yuuki Takezawa
  *
  */
 
-namespace Ytake\Hungrr\Exception;
+namespace Ytake\Hungrr\Response;
 
-final class UploadedFileException extends \RuntimeException {
+use type Ytake\Hungrr\Response;
+use type Ytake\Hungrr\StatusCode;
+use type Facebook\Experimental\Http\Message\UriInterface;
+use namespace HH\Lib\Experimental\IO;
 
+class RedirectResponse extends Response {
+
+  public function __construct(
+    UriInterface $uri,
+    StatusCode $status = StatusCode::FOUND,
+    dict<string, vec<string>> $headers = dict[]
+  ) {
+    $headers['location'] = vec[(string) $uri];
+    parent::__construct(
+      IO\request_output(),
+      $status,
+      $headers,
+    );
+  }
 }
