@@ -1,8 +1,7 @@
-<?hh // strict
-
 use type Ytake\Hungrr\Response;
 use type Ytake\Hungrr\StatusCode;
 use type Facebook\HackTest\HackTest;
+use type Facebook\HackTest\DataProvider;
 
 use namespace HH\Lib\Experimental\IO;
 use function Facebook\FBExpect\expect;

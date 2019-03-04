@@ -1,5 +1,3 @@
-<?hh // strict
-
 use type Ytake\Hungrr\ServerRequest;
 use type Ytake\Hungrr\ServerRequestFactory;
 use type Facebook\HackTest\HackTest;

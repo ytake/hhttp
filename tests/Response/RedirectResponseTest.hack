@@ -1,5 +1,3 @@
-<?hh // strict
-
 use type Ytake\Hungrr\Uri;
 use type Ytake\Hungrr\Response\RedirectResponse;
 use type Facebook\HackTest\HackTest;
