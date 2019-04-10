@@ -49,7 +49,7 @@ final class Uri implements UriInterface {
     if ('' !== $uri) {
       $parts = $this->parseUrl($uri);
       if (0 === C\count(Shapes::toArray($parts))) {
-        throw new Exception\UriFormatException("Unable to parse URI: $uri");
+        throw new Exception\UriFormatException("Unable to parse URI: ".$uri);
       }
       $this->extract($parts);
     }

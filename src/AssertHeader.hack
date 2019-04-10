@@ -22,6 +22,7 @@ use function in_array;
 use function gettype;
 use function get_class;
 use function strval;
+use function is_object;
 
 /**
  * @see https://github.com/zendframework/zend-diactoros/blob/master/src/HeaderSecurity.php
@@ -68,7 +69,7 @@ final class AssertHeader {
   }
 
   public static function assertValid(mixed $value): void {
-    if (!$value is string && ! is_numeric($value)) {
+    if (!$value is string && ! $value is num) {
       throw new Exception\InvalidArgumentException(Str\format(
         'Invalid header value type; must be a string or numeric; received %s',
         (is_object($value) ? get_class($value) : gettype($value))
