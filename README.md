@@ -10,14 +10,14 @@ PSR-7 was designed for PHP, not Hack, and some descisions do not fit smoothly wi
 Not Supported PHP
 
 ## Requirements
-HHVM 3.29 and above.
+HHVM 4.0.0 and above.
 
 ## Install
 
 via Composer
 
 ```bash
-$ hhvm $(which composer) ytake/hungrr
+$ composer install ytake/hungrr
 ```
 
 ## Usage
@@ -25,8 +25,6 @@ $ hhvm $(which composer) ytake/hungrr
 ## Marshaling an incoming request
 
 ```hack
-<?hh // strict
-
 use type Ytake\Hungrr\ServerRequestFactory;
 
 $request = ServerRequestFactory::fromGlobals();
@@ -38,7 +36,7 @@ $request = ServerRequestFactory::fromGlobals();
 
 Constructor Detail
 
-```text
+```hack
   public function __construct(
     private \HH\Lib\Experimental\IO\WriteHandle $body,
     StatusCode $status = StatusCode::OK,
@@ -50,18 +48,16 @@ Constructor Detail
 Example
 
 ```hack
-<?hh // strict
-
 use type Ytake\Hungrr\Uri;
 use type Ytake\Hungrr\StatusCode;
 use type Ytake\Hungrr\Response\RedirectResponse;
 use namespace HH\Lib\Experimental\IO;
 
 list($read, $write) = IO\pipe_non_disposable();
-await $write->writeAsync(\json_encode(new ImmMap([
-  'testing' => ImmMap{
+await $write->writeAsync(\json_encode(dict[
+  'testing' => dict[
     'HHVM' => 'Hack'
-  }
+  ]
 ])));
 ```
 
