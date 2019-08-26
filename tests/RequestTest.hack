@@ -10,7 +10,7 @@ final class RequestTest extends HackTest {
 
   public function testRequestUriMayBeString(): void {
     $r = new Request(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
-    expect((string) $r->getUri())->toBeSame('/');
+    expect($r->getUri()->toString())->toBeSame('/');
   }
 
   public function testRequestUriMayBeUri(): void {

@@ -65,6 +65,6 @@ final class UriTest extends HackTest {
 
   <<DataProvider('vecUris')>>
   public function testValidUrisStayValid(string $input): void {
-    expect(new Uri($input) |> strval($$))->toBeSame($input);
+    expect(new Uri($input) |> $$->toString())->toBeSame($input);
   }
 }

@@ -55,10 +55,6 @@ final class Uri implements UriInterface {
     }
   }
 
-  public function __toString(): string {
-    return $this->toString();
-  }
-
   public function toString(): string {
     return self::createUriString(
       $this->scheme,

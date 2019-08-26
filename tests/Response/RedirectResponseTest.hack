@@ -18,6 +18,6 @@ final class RedirectResponseTest extends HackTest {
     $r = new RedirectResponse($uri);
     expect($r->getStatusCode())->toBeSame(302);
     expect($r->hasHeader('Location'))->toBeTrue();
-    expect($r->getHeaderLine('Location'))->toBeSame((string) $uri);
+    expect($r->getHeaderLine('Location'))->toBeSame($uri->toString());
   }
 }

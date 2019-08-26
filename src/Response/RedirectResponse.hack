@@ -28,7 +28,7 @@ class RedirectResponse extends Response {
     StatusCode $status = StatusCode::FOUND,
     dict<string, vec<string>> $headers = dict[]
   ) {
-    $headers['location'] = vec[(string) $uri];
+    $headers['location'] = vec[$uri->toString()];
     parent::__construct(
       IO\request_output(),
       $status,
