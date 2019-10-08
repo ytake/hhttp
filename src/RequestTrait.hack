@@ -16,12 +16,14 @@
 
 namespace Ytake\Hungrr;
 
-use type Facebook\Experimental\Http\Message\UriInterface;
-use type Facebook\Experimental\Http\Message\RequestInterface;
-use type Facebook\Experimental\Http\Message\RequestURIOptions;
+use type Facebook\Experimental\Http\Message\{
+  RequestInterface,
+  RequestURIOptions,
+  UriInterface,
+};
 use namespace HH\Lib\Experimental\IO;
 use namespace Facebook\Experimental\Http\Message;
-use namespace HH\Lib\{Regex, C};
+use namespace HH\Lib\{C, Regex};
 
 trait RequestTrait {
   use MessageTrait;

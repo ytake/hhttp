@@ -10,7 +10,7 @@ PSR-7 was designed for PHP, not Hack, and some descisions do not fit smoothly wi
 Not Supported PHP
 
 ## Requirements
-HHVM 4.0.0 and above.
+HHVM 4.20.0 and above.
 
 ## Install
 
@@ -78,8 +78,6 @@ $uri, MUST be a string or Facebook\Experimental\Http\Message\UriInterface instan
 Example
 
 ```hack
-<?hh // strict
-
 use type Ytake\Hungrr\Uri;
 use type Ytake\Hungrr\StatusCode;
 use type Ytake\Hungrr\Response\RedirectResponse;

@@ -1,5 +1,4 @@
-use type Ytake\Hungrr\Uri;
-use type Ytake\Hungrr\Request;
+use type Ytake\Hungrr\{Request, Uri};
 use type Facebook\HackTest\HackTest;
 
 use namespace HH\Lib\Experimental\IO;

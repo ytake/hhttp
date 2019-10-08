@@ -18,7 +18,7 @@ namespace Ytake\Hungrr;
 
 use type Facebook\Experimental\Http\Message\UriInterface;
 use namespace Ytake\Hungrr\Exception;
-use namespace HH\Lib\{Str, C, Dict};
+use namespace HH\Lib\{C, Dict, Str};
 use function preg_replace_callback;
 use function http_build_query;
 use function rawurlencode;
@@ -231,8 +231,8 @@ final class Uri implements UriInterface {
       $this->fragment = $this->filterQueryAndFragment($result);
     }
     $this->password = Shapes::idx($parts, 'pass', '');
-    $out = [];
-    parse_str($this->rawQuery, &$out);
+    $out = dict[];
+    parse_str($this->rawQuery, inout $out);
     $this->query = dict($out);
   }
 
@@ -257,7 +257,7 @@ final class Uri implements UriInterface {
         if ('' !== $authority) {
           $path = '/'.$path;
         }
-      } elseif (C\contains_key($chunked, 1) && '/' === $chunked[1]) {
+      } else if (C\contains_key($chunked, 1) && '/' === $chunked[1]) {
         if ('' === $authority) {
           $path = '/'.Str\trim_left($path, '/');
         }
@@ -266,7 +266,7 @@ final class Uri implements UriInterface {
     }
     $out = [];
     $mergeQuery = dict[];
-    parse_str($rawQuery, &$out);
+    parse_str($rawQuery, inout $out);
     $mergeQuery = Dict\merge($query, dict($out));
     if(C\count($mergeQuery)) {
       $uri .= '?'. http_build_query($mergeQuery);
@@ -304,18 +304,24 @@ final class Uri implements UriInterface {
   }
 
   private function filterPath(string $path): string {
+    $count = null;
     return preg_replace_callback(
       '/(?:[^'.self::$charUnreserved.self::$charSubDelims.'%:@\/]++|%(?![A-Fa-f0-9]{2}))/',
       (array<int, string> $match) ==> rawurlencode($match[0]),
-      $path
+      $path,
+      -1,
+      inout $count
     );
   }
 
   private function filterQueryAndFragment(string $str): string {
+    $count = null;
     return preg_replace_callback(
       '/(?:[^'. self::$charUnreserved . self::$charSubDelims . '%:@\/\?]++|%(?![A-Fa-f0-9]{2}))/',
       (array<int, string> $match) ==> rawurlencode($match[0]),
-      $str
+      $str,
+      -1,
+      inout $count
     );
   }
 }

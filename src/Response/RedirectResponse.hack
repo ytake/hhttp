@@ -16,8 +16,7 @@
 
 namespace Ytake\Hungrr\Response;
 
-use type Ytake\Hungrr\Response;
-use type Ytake\Hungrr\StatusCode;
+use type Ytake\Hungrr\{Response, StatusCode};
 use type Facebook\Experimental\Http\Message\UriInterface;
 use namespace HH\Lib\Experimental\IO;
 

@@ -16,7 +16,7 @@
 
 namespace Ytake\Hungrr;
 
-use namespace HH\Lib\{Str, Regex};
+use namespace HH\Lib\{Regex, Str};
 use function ord;
 use function in_array;
 use function gettype;

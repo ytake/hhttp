@@ -16,7 +16,7 @@
 
 namespace Ytake\Hungrr;
 
-use namespace HH\Lib\{Str, Regex, Vec, C, Dict};
+use namespace HH\Lib\{C, Dict, Regex, Str, Vec};
 
 trait MessageTrait {
 

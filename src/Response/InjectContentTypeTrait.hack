@@ -17,7 +17,7 @@
 namespace Ytake\Hungrr\Response;
 
 use type Ytake\Hungrr\Response;
-use namespace HH\Lib\{Vec, Str, C};
+use namespace HH\Lib\{C, Str, Vec};
 
 trait InjectContentTypeTrait {
   require extends Response;

@@ -1,5 +1,4 @@
-use type Ytake\Hungrr\Uri;
-use type Ytake\Hungrr\ServerRequest;
+use type Ytake\Hungrr\{ServerRequest, Uri};
 use type Facebook\HackTest\HackTest;
 use namespace HH\Lib\Experimental\IO;
 use namespace Facebook\Experimental\Http\Message;
@@ -9,7 +8,7 @@ final class ServerRequestTest extends HackTest {
 
   public function testShouldBeSameServerParams(): void {
     $params = dict['name' => 'value'];
-    list($r, $w) = IO\pipe_non_disposable();
+    list($r, $_w) = IO\pipe_non_disposable();
     $request = new ServerRequest(
       Message\HTTPMethod::GET,
       new Uri('/'),

@@ -1,5 +1,4 @@
-use type Ytake\Hungrr\ServerRequest;
-use type Ytake\Hungrr\ServerRequestFactory;
+use type Ytake\Hungrr\{ServerRequest, ServerRequestFactory};
 use type Facebook\HackTest\HackTest;
 use function Facebook\FBExpect\expect;
 

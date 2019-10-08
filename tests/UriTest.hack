@@ -1,8 +1,6 @@
 use type Ytake\Hungrr\Uri;
-use type Facebook\HackTest\HackTest;
-use type Facebook\HackTest\DataProvider;
+use type Facebook\HackTest\{DataProvider, HackTest};
 
-use function strval;
 use function Facebook\FBExpect\expect;
 
 final class UriTest extends HackTest {
