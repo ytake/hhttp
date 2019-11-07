@@ -7,7 +7,7 @@ use function Facebook\FBExpect\expect;
 final class JsonResponseTest extends HackTest {
 
   public async function testShouldReturnEmptyJsonBody(): Awaitable<void> {
-    list($read, $write) = IO\pipe_non_disposable();
+    list($read, $write) = IO\pipe_nd();
     $r = new JsonResponse($write);
     await $write->writeAsync(\json_encode(new ImmMap([])));
     expect($r->getStatusCode())->toBeSame(200);
@@ -16,13 +16,16 @@ final class JsonResponseTest extends HackTest {
     expect($r->getHeaders())->toBeSame(dict[
       'content-type' => vec['application/json'],
     ]);
-    await $r->getBody()->closeAsync();
+    $handler = $r->getBody();
+    if($handler is IO\NonDisposableHandle) {
+      await $handler->closeAsync();
+    }
     $re = await $read->readAsync();
     expect($re)->toBeSame('{}');
   }
 
   public async function testShouldReturnJsonBody(): Awaitable<void> {
-    list($read, $write) = IO\pipe_non_disposable();
+    list($read, $write) = IO\pipe_nd();
     await $write->writeAsync(\json_encode(new ImmMap([
       'testing' => ImmMap{
         'HHVM' => 'Hack'
@@ -35,13 +38,16 @@ final class JsonResponseTest extends HackTest {
     expect($r->getHeaders())->toBeSame(dict[
       'content-type' => vec['application/json'],
     ]);
-    await $r->getBody()->closeAsync();
+    $handler = $r->getBody();
+    if($handler is IO\NonDisposableHandle) {
+      await $handler->closeAsync();
+    }
     $re = await $read->readAsync();
     expect($re)->toBeSame('{"testing":{"HHVM":"Hack"}}');
   }
 
   public async function testShouldReturnAppendHeaders(): Awaitable<void> {
-    list($read, $write) = IO\pipe_non_disposable();
+    list($read, $write) = IO\pipe_nd();
     await $write->writeAsync(\json_encode(new ImmMap(['testing' => ImmMap{'HHVM' => 'Hack'}])));
     $r = new JsonResponse(
       $write,
@@ -56,7 +62,10 @@ final class JsonResponseTest extends HackTest {
       'X-App_Message' => vec['testing.'],
       'content-type' => vec['application/hal+json'],
     ]);
-    await $r->getBody()->closeAsync();
+    $handler = $r->getBody();
+    if($handler is IO\NonDisposableHandle) {
+      await $handler->closeAsync();
+    }
     $re = await $read->readAsync();
     expect($re)->toBeSame('{"testing":{"HHVM":"Hack"}}');
   }

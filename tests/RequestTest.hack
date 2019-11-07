@@ -25,7 +25,7 @@ final class RequestTest extends HackTest {
   }
 
   public function testCanConstructWithBody(): void {
-    list($r, $w) = IO\pipe_non_disposable();
+    list($r, $w) = IO\pipe_nd();
     $w->rawWriteBlocking('baz');
     $re = new Request(Message\HTTPMethod::GET, new Uri('/'), $r);
     expect($re->getBody())->toBeInstanceOf(IO\ReadHandle::class);
@@ -33,14 +33,14 @@ final class RequestTest extends HackTest {
   }
 
   public function testNullBody(): void{
-    list($r, $w) = IO\pipe_non_disposable();
+    list($r, $w) = IO\pipe_nd();
     $w->rawWriteBlocking('');
     $re = new Request(Message\HTTPMethod::GET, new Uri('/'), $r);
     expect($re->getBody()->rawReadBlocking())->toBeSame('');
   }
 
   public function testFalseyBody(): void {
-    list($r, $w) = IO\pipe_non_disposable();
+    list($r, $w) = IO\pipe_nd();
     $w->rawWriteBlocking('0');
     $re = new Request(Message\HTTPMethod::GET, new Uri('/'), $r);
     expect($re->getBody()->rawReadBlocking())->toBeSame('0');
@@ -95,7 +95,7 @@ final class RequestTest extends HackTest {
   }
 
   public function testHostIsAddedFirst(): void {
-    list($r, $w) = IO\pipe_non_disposable();
+    list($r, $w) = IO\pipe_nd();
     $w->rawWriteBlocking('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
@@ -108,7 +108,7 @@ final class RequestTest extends HackTest {
   }
 
   public function testCanGetHeaderAsCsv(): void {
-    list($r, $w) = IO\pipe_non_disposable();
+    list($r, $w) = IO\pipe_nd();
     $w->rawWriteBlocking('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
@@ -123,7 +123,7 @@ final class RequestTest extends HackTest {
   }
 
   public function testHostIsNotOverwrittenWhenPreservingHost(): void {
-    list($r, $w) = IO\pipe_non_disposable();
+    list($r, $w) = IO\pipe_nd();
     $w->rawWriteBlocking('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
@@ -148,7 +148,7 @@ final class RequestTest extends HackTest {
   }
 
   public function testAggregatesHeaders(): void {
-    list($r, $w) = IO\pipe_non_disposable();
+    list($r, $w) = IO\pipe_nd();
     $w->rawWriteBlocking('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
@@ -163,7 +163,7 @@ final class RequestTest extends HackTest {
   }
 
   public function testSupportNumericHeaders(): void {
-    list($r, $w) = IO\pipe_non_disposable();
+    list($r, $w) = IO\pipe_nd();
     $w->rawWriteBlocking('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
