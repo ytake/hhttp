@@ -19,7 +19,7 @@ namespace Ytake\Hungrr;
 use namespace HH\Lib\Str;
 use namespace Ytake\Hungrr\Exception;
 use namespace Facebook\Experimental\Http\Message;
-use namespace HH\Lib\Experimental\{Filesystem, IO};
+use namespace HH\Lib\Experimental\{File, IO};
 use function php_sapi_name;
 use function rename;
 use function move_uploaded_file;
@@ -37,8 +37,8 @@ class UploadedFile implements Message\UploadedFileInterface {
   }
 
   <<__Memoize>>
-  private function open(string $filename): Filesystem\FileReadHandle {
-    return Filesystem\open_read_only_non_disposable($filename);
+  private function open(string $filename): File\NonDisposableReadHandle {
+    return File\open_read_only_nd($filename);
   }
 
   <<__Memoize>>
@@ -49,7 +49,7 @@ class UploadedFile implements Message\UploadedFileInterface {
   private function assertDirectories(string $target): (string, string) {
     $iv = new ImmVector([$target, $this->filename]);
     $v = $iv->map($v ==> {
-      $path = new Filesystem\Path($v);
+      $path = new File\Path($v);
       if(!$path->exists()) {
         throw new Exception\PathNotFoundException(
           Str\format("%s path not found.", $v)
