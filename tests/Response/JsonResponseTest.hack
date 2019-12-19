@@ -17,7 +17,7 @@ final class JsonResponseTest extends HackTest {
       'content-type' => vec['application/json'],
     ]);
     $handler = $r->getBody();
-    if($handler is IO\NonDisposableHandle) {
+    if($handler is IO\CloseableHandle) {
       await $handler->closeAsync();
     }
     $re = await $read->readAsync();
@@ -39,7 +39,7 @@ final class JsonResponseTest extends HackTest {
       'content-type' => vec['application/json'],
     ]);
     $handler = $r->getBody();
-    if($handler is IO\NonDisposableHandle) {
+    if($handler is IO\CloseableHandle) {
       await $handler->closeAsync();
     }
     $re = await $read->readAsync();
@@ -63,7 +63,7 @@ final class JsonResponseTest extends HackTest {
       'content-type' => vec['application/hal+json'],
     ]);
     $handler = $r->getBody();
-    if($handler is IO\NonDisposableHandle) {
+    if($handler is IO\CloseableHandle) {
       await $handler->closeAsync();
     }
     $re = await $read->readAsync();

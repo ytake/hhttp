@@ -14,7 +14,7 @@ final class ResponseTest extends HackTest {
     expect($r->getReasonPhrase())->toBeSame('OK');
     expect($r->getHeaders())->toBeSame(dict[]);
     $handler = $r->getBody();
-    if($handler is IO\NonDisposableHandle) {
+    if($handler is IO\CloseableHandle) {
       await $handler->closeAsync();
     }
     $re = await $read->readAsync();
@@ -50,9 +50,9 @@ final class ResponseTest extends HackTest {
     list($read, $write) = IO\pipe_nd();
     await $write->writeAsync('baz');
     $r = new Response($write, StatusCode::OK, dict[]);
-    expect($r->getBody())->toBeInstanceOf(IO\NonDisposableHandle::class);
+    expect($r->getBody())->toBeInstanceOf(IO\CloseableHandle::class);
     $handler = $r->getBody();
-    if($handler is IO\NonDisposableHandle) {
+    if($handler is IO\CloseableHandle) {
       await $handler->closeAsync();
     }
     $re = await $read->readAsync();
@@ -62,9 +62,9 @@ final class ResponseTest extends HackTest {
   public async function testNullBody(): Awaitable<void> {
     list($read, $write) = IO\pipe_nd();
     $r = new Response($write, StatusCode::OK, dict[]);
-    expect($r->getBody())->toBeInstanceOf(IO\NonDisposableHandle::class);
+    expect($r->getBody())->toBeInstanceOf(IO\CloseableHandle::class);
     $handler = $r->getBody();
-    if($handler is IO\NonDisposableHandle) {
+    if($handler is IO\CloseableHandle) {
       await $handler->closeAsync();
     }
     $re = await $read->readAsync();
@@ -75,9 +75,9 @@ final class ResponseTest extends HackTest {
     list($read, $write) = IO\pipe_nd();
     await $write->writeAsync('0');
     $r = new Response($write, StatusCode::OK, dict[]);
-    expect($r->getBody())->toBeInstanceOf(IO\NonDisposableHandle::class);
+    expect($r->getBody())->toBeInstanceOf(IO\CloseableHandle::class);
     $handler = $r->getBody();
-    if($handler is IO\NonDisposableHandle) {
+    if($handler is IO\CloseableHandle) {
       await $handler->closeAsync();
     }
     $re = await $read->readAsync();
@@ -131,9 +131,9 @@ final class ResponseTest extends HackTest {
     list($read, $write) = IO\pipe_nd();
     await $write->writeAsync('testing');
     $r = new Response($write);
-    expect($r->getBody())->toBeInstanceOf(IO\NonDisposableHandle::class);
+    expect($r->getBody())->toBeInstanceOf(IO\CloseableHandle::class);
     $handler = $r->getBody();
-    if($handler is IO\NonDisposableHandle) {
+    if($handler is IO\CloseableHandle) {
       await $handler->closeAsync();
     }
     $re = await $read->readAsync();
