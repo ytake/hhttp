@@ -9,7 +9,7 @@ final class JsonResponseTest extends HackTest {
   public async function testShouldReturnEmptyJsonBody(): Awaitable<void> {
     list($read, $write) = IO\pipe_nd();
     $r = new JsonResponse($write);
-    await $write->writeAsync(\json_encode(new ImmMap([])));
+    await $write->writeAsync(\json_encode(new ImmMap(dict[])));
     expect($r->getStatusCode())->toBeSame(200);
     expect($r->getProtocolVersion())->toBeSame('1.1');
     expect($r->getReasonPhrase())->toBeSame('OK');
@@ -26,7 +26,7 @@ final class JsonResponseTest extends HackTest {
 
   public async function testShouldReturnJsonBody(): Awaitable<void> {
     list($read, $write) = IO\pipe_nd();
-    await $write->writeAsync(\json_encode(new ImmMap([
+    await $write->writeAsync(\json_encode(new ImmMap(dict[
       'testing' => ImmMap{
         'HHVM' => 'Hack'
       }
@@ -48,7 +48,7 @@ final class JsonResponseTest extends HackTest {
 
   public async function testShouldReturnAppendHeaders(): Awaitable<void> {
     list($read, $write) = IO\pipe_nd();
-    await $write->writeAsync(\json_encode(new ImmMap(['testing' => ImmMap{'HHVM' => 'Hack'}])));
+    await $write->writeAsync(\json_encode(new ImmMap(dict['testing' => ImmMap{'HHVM' => 'Hack'}])));
     $r = new JsonResponse(
       $write,
       StatusCode::ACCEPTED,
