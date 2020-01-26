@@ -23,8 +23,10 @@ final class UploadedFileTest extends HackTest {
   }
 
   public function testShouldMovedFileExists(): void {
-    $this->files[] = $from = tempnam(sys_get_temp_dir(), 'copy_from');
-    $this->files[] = $to = tempnam(sys_get_temp_dir(), 'copy_to');
+    $from = tempnam(sys_get_temp_dir(), 'copy_from');
+    $this->files[] = $from;
+    $to = tempnam(sys_get_temp_dir(), 'copy_to');
+    $this->files[] = $to;
     copy(__FILE__, $from);
     $uf = new UploadedFile($from, null,basename($from), 'text/plain');
     $uf->moveTo($to);
@@ -36,9 +38,11 @@ final class UploadedFileTest extends HackTest {
   }
 
   public function testMoveCannotBeCalledMoreThanOnce(): void {
-    $this->files[] = $from = tempnam(sys_get_temp_dir(), 'copy_from');
+    $from = tempnam(sys_get_temp_dir(), 'copy_from');
+    $this->files[] = $from;
     $upload = new UploadedFile($from);
-    $this->files[] = $to = tempnam(sys_get_temp_dir(), 'diac');
+    $to = tempnam(sys_get_temp_dir(), 'diac');
+    $this->files[] = $to;
     $upload->moveTo($to);
     expect(file_exists($to))->toBeTrue();
     expect(() ==> $upload->moveTo($to))
@@ -46,9 +50,11 @@ final class UploadedFileTest extends HackTest {
   }
 
   public function testShouldThrow(): void {
-    $this->files[] = $from = tempnam(sys_get_temp_dir(), 'copy_from');
+    $from = tempnam(sys_get_temp_dir(), 'copy_from');
+    $this->files[] = $from;
     $upload = new UploadedFile($from, Message\UploadedFileError::ERROR_NO_FILE);
-    $this->files[] = $to = tempnam(sys_get_temp_dir(), 'diac');
+    $to = tempnam(sys_get_temp_dir(), 'diac');
+    $this->files[] = $to;
     expect(() ==> $upload->moveTo($to))
       ->toThrow(Exception\UploadedFileException::class);
   }

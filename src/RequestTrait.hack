@@ -57,7 +57,8 @@ trait RequestTrait {
     }
     $target = '';
     $uri = $this->uri;
-    if ('' === $target = $uri->getPath()) {
+    $target = $uri->getPath();
+    if ('' === $target) {
       $target = '/';
     }
     if ('' !== $uri->getRawQuery()) {
@@ -108,10 +109,12 @@ trait RequestTrait {
 
   private function updateHostFromUri(): void {
     $uri = $this->uri;
-    if ('' === $host = $uri->getHost()) {
+    $host = $uri->getHost();
+    if ('' === $host) {
       return;
     }
-    if (null !== ($port = $uri->getPort())) {
+    $port = $uri->getPort();
+    if (null !== $port) {
       $host .= ':'.$port;
     }
     if (!C\contains_key($this->headerNames, 'host')) {

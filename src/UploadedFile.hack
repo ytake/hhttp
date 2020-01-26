@@ -47,7 +47,7 @@ class UploadedFile implements Message\UploadedFileInterface {
   }
 
   private function assertDirectories(string $target): (string, string) {
-    $iv = new ImmVector([$target, $this->filename]);
+    $iv = new ImmVector(vec[$target, $this->filename]);
     $v = $iv->map($v ==> {
       $path = new File\Path($v);
       if(!$path->exists()) {

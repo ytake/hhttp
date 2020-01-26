@@ -130,7 +130,8 @@ final class Uri implements UriInterface {
   }
 
   public function withScheme(string $scheme): this {
-    if ($this->scheme === $scheme = $this->filterScheme($scheme)) {
+    $scheme = $this->filterScheme($scheme);
+    if ($this->scheme === $scheme) {
       return $this;
     }
     $new = clone $this;
@@ -150,7 +151,8 @@ final class Uri implements UriInterface {
   }
 
   public function withHost(string $host): this {
-    if ($this->host === $host = $this->filterHost($host)) {
+    $host = $this->filterHost($host);
+    if ($this->host === $host) {
       return $this;
     }
     $new = clone $this;
@@ -159,7 +161,8 @@ final class Uri implements UriInterface {
   }
 
   public function withPort(?int $port = null): this {
-    if ($this->port === $port = $this->filterPort($port)) {
+    $port = $this->filterPort($port);
+    if ($this->port === $port) {
       return $this;
     }
     $new = clone $this;
@@ -168,7 +171,8 @@ final class Uri implements UriInterface {
   }
 
   public function withPath(string $path): this {
-    if ($this->path === $path = $this->filterPath($path)) {
+    $path = $this->filterPath($path);
+    if ($this->path === $path) {
       return $this;
     }
     $new = clone $this;
@@ -187,7 +191,8 @@ final class Uri implements UriInterface {
   }
 
   public function withRawQuery(string $query): this {
-    if ($this->query === $query = $this->filterQueryAndFragment($query)) {
+    $query = $this->filterQueryAndFragment($query);
+    if ($this->query === $query) {
       return $this;
     }
     $new = clone $this;
@@ -196,7 +201,8 @@ final class Uri implements UriInterface {
   }
 
   public function withFragment(string $fragment): this {
-    if ($this->fragment === $fragment = $this->filterQueryAndFragment($fragment)) {
+    $fragment = $this->filterQueryAndFragment($fragment);
+    if ($this->fragment === $fragment) {
       return $this;
     }
     $new = clone $this;
@@ -264,7 +270,7 @@ final class Uri implements UriInterface {
       }
       $uri .= $path;
     }
-    $out = [];
+    $out = dict[];
     $mergeQuery = dict[];
     parse_str($rawQuery, inout $out);
     $mergeQuery = Dict\merge($query, dict($out));

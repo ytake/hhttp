@@ -40,7 +40,7 @@ final class AssertHeader {
       if ($ascii === 13) {
         $lf = ord($chunked[$i + 1]);
         $ws = ord($chunked[$i + 2]);
-        if ($lf === 10 && in_array($ws, [9, 32], true)) {
+        if ($lf === 10 && in_array($ws, vec[9, 32], true)) {
           $string .= $chunked[$i] . $chunked[$i + 1];
           $i += 1;
         }
