@@ -21,7 +21,7 @@ use type Facebook\Experimental\Http\Message\{
   UploadedFileInterface,
 };
 use namespace Facebook\Experimental\Http\Message;
-use namespace HH\Lib\Experimental\IO;
+use namespace HH\Lib\IO;
 
 class ServerRequest implements ServerRequestInterface {
 

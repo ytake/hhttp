@@ -21,9 +21,9 @@ use type Facebook\Experimental\Http\Message\{
   RequestURIOptions,
   UriInterface,
 };
-use namespace HH\Lib\Experimental\IO;
+
 use namespace Facebook\Experimental\Http\Message;
-use namespace HH\Lib\{C, Regex};
+use namespace HH\Lib\{C, IO, Regex};
 
 trait RequestTrait {
   use MessageTrait;

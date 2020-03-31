@@ -18,7 +18,7 @@ namespace Ytake\Hungrr;
 
 use type Facebook\Experimental\Http\Message\ResponseInterface;
 
-use namespace HH\Lib\Experimental\IO;
+use namespace HH\Lib\IO;
 
 class Response implements ResponseInterface {
   use MessageTrait;

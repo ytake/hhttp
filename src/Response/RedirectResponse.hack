@@ -18,7 +18,7 @@ namespace Ytake\Hungrr\Response;
 
 use type Ytake\Hungrr\{Response, StatusCode};
 use type Facebook\Experimental\Http\Message\UriInterface;
-use namespace HH\Lib\Experimental\IO;
+use namespace HH\Lib\IO;
 
 class RedirectResponse extends Response {
 

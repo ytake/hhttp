@@ -17,7 +17,7 @@
 namespace Ytake\Hungrr\Response;
 
 use type Ytake\Hungrr\{Response, StatusCode};
-use namespace HH\Lib\Experimental\IO;
+use namespace HH\Lib\IO;
 use const JSON_ERROR_NONE;
 
 class JsonResponse extends Response {

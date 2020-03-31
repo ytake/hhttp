@@ -19,7 +19,7 @@ namespace Ytake\Hungrr;
 use namespace HH\Lib\Str;
 use namespace Ytake\Hungrr\Exception;
 use namespace Facebook\Experimental\Http\Message;
-use namespace HH\Lib\Experimental\{File, IO};
+use namespace HH\Lib\{File, IO};
 use function php_sapi_name;
 use function rename;
 use function move_uploaded_file;

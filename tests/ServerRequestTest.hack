@@ -1,6 +1,6 @@
 use type Ytake\Hungrr\{ServerRequest, Uri};
 use type Facebook\HackTest\HackTest;
-use namespace HH\Lib\Experimental\IO;
+use namespace HH\Lib\IO;
 use namespace Facebook\Experimental\Http\Message;
 use function Facebook\FBExpect\expect;
 

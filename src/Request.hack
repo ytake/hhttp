@@ -18,7 +18,7 @@ namespace Ytake\Hungrr;
 
 use type Facebook\Experimental\Http\Message\RequestInterface;
 use namespace Facebook\Experimental\Http\Message;
-use namespace HH\Lib\Experimental\IO;
+use namespace HH\Lib\IO;
 
 class Request implements RequestInterface {
   use RequestTrait;

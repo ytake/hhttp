@@ -17,7 +17,7 @@
 namespace Ytake\Hungrr;
 
 use namespace HH\Lib\C;
-use namespace HH\Lib\Experimental\IO;
+use namespace HH\Lib\IO;
 use namespace Facebook\Experimental\Http\Message;
 
 class ServerRequestFactory {

@@ -1,7 +1,7 @@
 use type Ytake\Hungrr\{Response, StatusCode};
 use type Facebook\HackTest\{DataProvider, HackTest};
 
-use namespace HH\Lib\Experimental\IO;
+use namespace HH\Lib\IO;
 use function Facebook\FBExpect\expect;
 
 final class ResponseTest extends HackTest {
