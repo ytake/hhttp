@@ -16,12 +16,11 @@
 
 namespace Ytake\Hungrr;
 
-use type Facebook\Experimental\Http\Message\{
-  ServerRequestInterface,
-  UploadedFileInterface,
-};
+use type Ytake\Extended\HttpMessage\ServerRequestInterface;
+use type Facebook\Experimental\Http\Message\UploadedFileInterface;
 use namespace Facebook\Experimental\Http\Message;
-use namespace HH\Lib\IO;
+use namespace HH\Lib\{Dict, IO};
+use function array_key_exists;
 
 class ServerRequest implements ServerRequestInterface {
 
@@ -31,6 +30,7 @@ class ServerRequest implements ServerRequestInterface {
   private dict<string, string> $queryParams = dict[];
   private dict<string, UploadedFileInterface> $uploadedFiles = dict[];
   private dict<string, string> $parsedBody = dict[];
+  private dict<string, mixed> $attributes = dict[];
 
   public function __construct(
     private Message\HTTPMethod $method,
@@ -98,6 +98,40 @@ class ServerRequest implements ServerRequestInterface {
   public function withParsedBody(dict<string, string> $data): this {
     $new = clone $this;
     $new->parsedBody = $data;
+    return $new;
+  }
+
+  <<__Rx>>
+  public function getAttributes(): dict<string, mixed> {
+    return $this->attributes;
+  }
+
+  <<__Rx>>
+  public function getAttribute<T>(string $attribute, ?T $default = null): ?T {
+    if (array_key_exists($attribute, $this->attributes)) {
+      /* HH_FIXME[4110] */
+      return $this->attributes[$attribute];
+    }
+    return $default;
+  }
+
+  public function withAttribute(
+    string $attribute,
+    mixed $value
+  ): this {
+    $new = clone $this;
+    $new->attributes[$attribute] = $value;
+    return $new;
+  }
+
+  public function withoutAttribute(
+    string $attribute
+  ): this {
+    if (!array_key_exists($attribute, $this->attributes)) {
+      return $this;
+    }
+    $new = clone $this;
+    $new->attributes = Dict\filter_with_key($new->attributes, ($k, $_) ==> $k !== $attribute);
     return $new;
   }
 }

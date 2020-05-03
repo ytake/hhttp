@@ -22,7 +22,8 @@
     "hhvm/hsl": "^4.0",
     "hhvm/hsl-experimental": "^4.50",
     "hhvm/hhvm-autoload": "^3.0",
-    "facebook/hack-http-request-response-interfaces": "^0.3"
+    "facebook/hack-http-request-response-interfaces": "^0.3",
+    "ytake/extended-hack-http-request": "^0.1.2"
   },
   "require-dev": {
     "hhvm/hacktest": "^2.0",

@@ -46,4 +46,37 @@ final class ServerRequestTest extends HackTest {
     expect($request->getParsedBody())->toBeEmpty();
     expect($request2->getParsedBody())->toBeSame($params);
   }
+
+  public function testShouldExpectAttributes(): void {
+    $request1 = new ServerRequest(Message\HTTPMethod::GET, new Uri('/'), IO\request_input());
+    $request2 = $request1->withAttribute('name', 'value');
+    $request3 = $request2->withAttribute('other', 'otherValue');
+    $request4 = $request3->withoutAttribute('other');
+    $request5 = $request3->withoutAttribute('unknown');
+    expect($request1)->toNotBeSame($request2);
+    expect($request2)->toNotBeSame($request3);
+    expect($request3)->toNotBeSame($request4);
+    expect($request4)->toNotBeSame($request5);
+    expect($request1->getAttributes())->toBeSame(dict[]);
+    expect($request1->getAttribute<string>('name'))->toBeNull();
+    expect($request1->getAttribute<string>('name', 'something'))
+      ->toBeSame('something');
+    expect($request2->getAttribute<string>('name'))->toBeSame('value');
+    expect($request2->getAttributes())
+      ->toBeSame(dict['name' => 'value']);
+    expect($request3->getAttributes())
+      ->toBeSame(dict['name' => 'value', 'other' => 'otherValue']);
+    expect($request4->getAttributes())->toBeSame(dict['name' => 'value']);
+  }
+
+  public function testShouldBeNull(): void {
+    $request = (new ServerRequest(Message\HTTPMethod::GET, new Uri('/'), IO\request_input()))
+      ->withAttribute('name', null);
+    expect($request->getAttributes())->toBeSame(dict['name' => null]);
+    expect($request->getAttribute('name', 'different-default'))->toBeNull();
+    $requestWithoutAttribute = $request->withoutAttribute('name');
+    expect($requestWithoutAttribute->getAttributes())->toBeSame(dict[]);
+    expect($requestWithoutAttribute->getAttribute<string>('name', 'different-default'))
+      ->toBeSame('different-default');
+  }
 }
