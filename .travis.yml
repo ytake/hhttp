@@ -14,6 +14,10 @@ env:
     - HHVM_VERSION=4.48.0
     - HHVM_VERSION=4.49.0
     - HHVM_VERSION=4.50.0
+    - HHVM_VERSION=4.51.0
+    - HHVM_VERSION=4.52.1
+    - HHVM_VERSION=4.53.0
+    - HHVM_VERSION=4.54.0
     - HHVM_VERSION=latest
 install:
 - docker pull hhvm/hhvm:$HHVM_VERSION
