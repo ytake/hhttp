@@ -24,26 +24,26 @@ final class RequestTest extends HackTest {
     })->toThrow(\InvalidArgumentException::class, 'Unable to parse URI: ///');
   }
 
-  public function testCanConstructWithBody(): void {
+  public async function testCanConstructWithBody(): Awaitable<void> {
     list($r, $w) = IO\pipe_nd();
-    $w->rawWriteBlocking('baz');
+    await $w->writeAsync('baz');
     $re = new Request(Message\HTTPMethod::GET, new Uri('/'), $r);
     expect($re->getBody())->toBeInstanceOf(IO\ReadHandle::class);
-    expect($re->getBody()->rawReadBlocking())->toBeSame('baz');
+    expect(await $re->getBody()->readAsync())->toBeSame('baz');
   }
 
-  public function testNullBody(): void{
+  public async function testNullBody(): Awaitable<void> {
     list($r, $w) = IO\pipe_nd();
-    $w->rawWriteBlocking('');
+    $w->write(' ');
     $re = new Request(Message\HTTPMethod::GET, new Uri('/'), $r);
-    expect($re->getBody()->rawReadBlocking())->toBeSame('');
+    expect($re->getBody()->read())->toBeSame(' ');
   }
 
-  public function testFalseyBody(): void {
+  public async function testFalseyBody(): Awaitable<void> {
     list($r, $w) = IO\pipe_nd();
-    $w->rawWriteBlocking('0');
+    await $w->writeAsync('0');
     $re = new Request(Message\HTTPMethod::GET, new Uri('/'), $r);
-    expect($re->getBody()->rawReadBlocking())->toBeSame('0');
+    expect(await $re->getBody()->readAsync())->toBeSame('0');
   }
 
   public function testWithUri(): void {
@@ -94,9 +94,9 @@ final class RequestTest extends HackTest {
     expect($r1->getRequestTarget())->toBeSame('/baz?0');
   }
 
-  public function testHostIsAddedFirst(): void {
+  public async function testHostIsAddedFirst(): Awaitable<void> {
     list($r, $w) = IO\pipe_nd();
-    $w->rawWriteBlocking('testing');
+    $w->write('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
       new Uri('http://foo.com/baz?bar=bam'),
@@ -107,9 +107,9 @@ final class RequestTest extends HackTest {
     expect($re->getHeaders())->toContainKey('Foo');
   }
 
-  public function testCanGetHeaderAsCsv(): void {
+  public async function testCanGetHeaderAsCsv(): Awaitable<void> {
     list($r, $w) = IO\pipe_nd();
-    $w->rawWriteBlocking('testing');
+    $w->write('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
       new Uri('http://foo.com/baz?bar=bam'),
@@ -122,9 +122,9 @@ final class RequestTest extends HackTest {
     expect($re->getHeaderLine('Bar'))->toBeSame('');
   }
 
-  public function testHostIsNotOverwrittenWhenPreservingHost(): void {
+  public async function testHostIsNotOverwrittenWhenPreservingHost(): Awaitable<void> {
     list($r, $w) = IO\pipe_nd();
-    $w->rawWriteBlocking('testing');
+    $w->write('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
       new Uri('http://foo.com/baz?bar=bam'),
@@ -147,9 +147,9 @@ final class RequestTest extends HackTest {
     expect($r2->getHeaderLine('Host'))->toBeSame('www.baz.com');
   }
 
-  public function testAggregatesHeaders(): void {
+  public async function testAggregatesHeaders(): Awaitable<void> {
     list($r, $w) = IO\pipe_nd();
-    $w->rawWriteBlocking('testing');
+    $w->write('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
       new Uri(''),
@@ -162,9 +162,9 @@ final class RequestTest extends HackTest {
     expect($re->getHeaderLine('zoo'))->toBeSame('zoobar, foobar, zoobar');
   }
 
-  public function testSupportNumericHeaders(): void {
+  public async function testSupportNumericHeaders(): Awaitable<void> {
     list($r, $w) = IO\pipe_nd();
-    $w->rawWriteBlocking('testing');
+    $w->write('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
       new Uri(''),

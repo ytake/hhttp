@@ -313,7 +313,7 @@ final class Uri implements UriInterface {
     $count = null;
     return preg_replace_callback(
       '/(?:[^'.self::$charUnreserved.self::$charSubDelims.'%:@\/]++|%(?![A-Fa-f0-9]{2}))/',
-      (array<int, string> $match) ==> rawurlencode($match[0]),
+      (darray<int, string> $match) ==> rawurlencode($match[0]),
       $path,
       -1,
       inout $count
