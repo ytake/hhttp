@@ -7,7 +7,7 @@ use function Facebook\FBExpect\expect;
 final class ResponseTest extends HackTest {
 
   public async function testDefaultConstructor(): Awaitable<void> {
-    list($read, $write) = IO\pipe_nd();
+    list($read, $write) = IO\pipe();
     $r = new Response($write);
     expect($r->getStatusCode())->toBeSame(200);
     expect($r->getProtocolVersion())->toBeSame('1.1');
@@ -15,21 +15,21 @@ final class ResponseTest extends HackTest {
     expect($r->getHeaders())->toBeSame(dict[]);
     $handler = $r->getBody();
     if($handler is IO\CloseableHandle) {
-      await $handler->closeAsync();
+      $handler->close();
     }
     $re = await $read->readAsync();
     expect($re)->toBeSame('');
   }
 
   public function testCanConstructWithStatusCode(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::NOT_FOUND);
     expect($r->getStatusCode())->toBeSame(404);
     expect($r->getReasonPhrase())->toBeSame('Not Found');
   }
 
   public function testStatusCanBeNumericString(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::NOT_FOUND);
     $r2 = $r->withStatus(StatusCode::CREATED);
     expect($r->getStatusCode())->toBeSame(404);
@@ -39,7 +39,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testCanConstructWithHeaders(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::OK, dict['Foo' => vec['Bar']]);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
     expect($r->getHeaderLine('Foo'))->toBeSame('Bar');
@@ -47,45 +47,45 @@ final class ResponseTest extends HackTest {
   }
 
   public async function testCanConstructWithBody(): Awaitable<void> {
-    list($read, $write) = IO\pipe_nd();
+    list($read, $write) = IO\pipe();
     await $write->writeAsync('baz');
     $r = new Response($write, StatusCode::OK, dict[]);
     expect($r->getBody())->toBeInstanceOf(IO\CloseableHandle::class);
     $handler = $r->getBody();
     if($handler is IO\CloseableHandle) {
-      await $handler->closeAsync();
+      $handler->close();
     }
     $re = await $read->readAsync();
     expect($re)->toBeSame('baz');
   }
 
   public async function testNullBody(): Awaitable<void> {
-    list($read, $write) = IO\pipe_nd();
+    list($read, $write) = IO\pipe();
     $r = new Response($write, StatusCode::OK, dict[]);
     expect($r->getBody())->toBeInstanceOf(IO\CloseableHandle::class);
     $handler = $r->getBody();
     if($handler is IO\CloseableHandle) {
-      await $handler->closeAsync();
+      $handler->close();
     }
     $re = await $read->readAsync();
     expect($re)->toBeSame('');
   }
 
   public async function testFalseyBody(): Awaitable<void> {
-    list($read, $write) = IO\pipe_nd();
+    list($read, $write) = IO\pipe();
     await $write->writeAsync('0');
     $r = new Response($write, StatusCode::OK, dict[]);
     expect($r->getBody())->toBeInstanceOf(IO\CloseableHandle::class);
     $handler = $r->getBody();
     if($handler is IO\CloseableHandle) {
-      await $handler->closeAsync();
+      $handler->close();
     }
     $re = await $read->readAsync();
     expect($re)->toBeSame('0');
   }
 
   public function testCanConstructWithReason(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::OK, dict[], '1.1', 'bar');
     expect($r->getReasonPhrase())->toBeSame('bar');
     $r = new Response($write, StatusCode::OK, dict[], '1.1', '0');
@@ -93,20 +93,20 @@ final class ResponseTest extends HackTest {
   }
 
   public function testCanConstructWithProtocolVersion(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::OK, dict[], '1000');
     expect($r->getProtocolVersion())->toBeSame('1000');
   }
 
   public function testWithStatusCodeAndNoReason(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = (new Response($write,))->withStatus(201);
     expect($r->getStatusCode())->toBeSame(201);
     expect($r->getReasonPhrase())->toBeSame('Created');
   }
 
   public function testWithStatusCodeAndReason(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = (new Response($write,))->withStatus(201, 'Foo');
     expect($r->getStatusCode())->toBeSame(201);
     expect($r->getReasonPhrase())->toBeSame('Foo');
@@ -116,32 +116,32 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithProtocolVersion(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = (new Response($write,))->withProtocolVersion('1000');
     expect($r->getProtocolVersion())->toBeSame('1000');
   }
 
   public function testSameInstanceWhenSameProtocol(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write,);
     expect($r->withProtocolVersion('1.1'))->toBeSame($r);
   }
 
   public async function testWithBody(): Awaitable<void> {
-    list($read, $write) = IO\pipe_nd();
+    list($read, $write) = IO\pipe();
     await $write->writeAsync('testing');
     $r = new Response($write);
     expect($r->getBody())->toBeInstanceOf(IO\CloseableHandle::class);
     $handler = $r->getBody();
     if($handler is IO\CloseableHandle) {
-      await $handler->closeAsync();
+      $handler->close();
     }
     $re = await $read->readAsync();
     expect($re)->toBeSame('testing');
   }
 
   public function testWithHeader(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::OK, dict['Foo' => vec['Bar']]);
     $r2 = $r->withHeader('baZ', vec['Bam']);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
@@ -151,7 +151,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithHeaderAsArray(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::OK, dict['Foo' => vec['Bar']]);
     $r2 = $r->withHeader('baZ', vec['Bam', 'Bar']);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
@@ -161,7 +161,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithHeaderReplacesDifferentCase(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::OK, dict['Foo' => vec['Bar']]);
     $r2 = $r->withHeader('foO', vec['Bam']);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
@@ -171,7 +171,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithAddedHeader(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::OK, dict['Foo' => vec['Bar']]);
     $r2 = $r->withAddedHeader('foO', vec['Baz']);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
@@ -181,7 +181,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithAddedHeaderAsArray(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::OK, dict['Foo' => vec['Bar']]);
     $r2 = $r->withAddedHeader('foO', vec['Baz', 'Bam']);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
@@ -191,7 +191,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithAddedHeaderThatDoesNotExist(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::OK, dict['Foo' => vec['Bar']]);
     $r2 = $r->withAddedHeader('nEw', vec['Baz']);
     expect($r->getHeaders())->toBeSame(dict['Foo' => vec['Bar']]);
@@ -201,7 +201,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithoutHeaderThatExists(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::OK, dict['Foo' => vec['Bar'], 'Baz' => vec['Bam']]);
     $r2 = $r->withoutHeader('foO');
     expect($r->hasHeader('foo'))->toBeTrue();
@@ -211,7 +211,7 @@ final class ResponseTest extends HackTest {
   }
 
   public function testWithoutHeaderThatDoesNotExist(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write, StatusCode::OK, dict['Baz' => vec['Bam']]);
     $r2 = $r->withoutHeader('foO');
     expect($r2)->toBeSame($r);
@@ -220,13 +220,13 @@ final class ResponseTest extends HackTest {
   }
 
   public function testSameInstanceWhenRemovingMissingHeader(): void {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     $r = new Response($write,);
     expect($r->withoutHeader('foo'))->toBeSame($r);
   }
 
   public function trimmedHeaderValues(): vec<(Response)> {
-    list($_, $write) = IO\pipe_nd();
+    list($_, $write) = IO\pipe();
     return vec[
       tuple(new Response($write, StatusCode::OK, dict['OWS' => vec[" \t \tFoo\t \t "]])),
       tuple((new Response($write))->withHeader('OWS', vec[" \t \tFoo\t \t "])),

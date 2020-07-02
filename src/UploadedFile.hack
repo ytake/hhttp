@@ -38,7 +38,7 @@ class UploadedFile implements Message\UploadedFileInterface {
 
   <<__Memoize>>
   private function open(string $filename): File\CloseableReadHandle {
-    return File\open_read_only_nd($filename);
+    return File\open_read_only($filename);
   }
 
   <<__Memoize>>

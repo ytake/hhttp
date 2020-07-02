@@ -8,7 +8,7 @@ final class ServerRequestTest extends HackTest {
 
   public function testShouldBeSameServerParams(): void {
     $params = dict['name' => 'value'];
-    list($r, $_w) = IO\pipe_nd();
+    list($r, $_w) = IO\pipe();
     $request = new ServerRequest(
       Message\HTTPMethod::GET,
       new Uri('/'),

@@ -7,7 +7,7 @@ use function Facebook\FBExpect\expect;
 final class JsonResponseTest extends HackTest {
 
   public async function testShouldReturnEmptyJsonBody(): Awaitable<void> {
-    list($read, $write) = IO\pipe_nd();
+    list($read, $write) = IO\pipe();
     $r = new JsonResponse($write);
     await $write->writeAsync(\json_encode(new ImmMap(dict[])));
     expect($r->getStatusCode())->toBeSame(200);
@@ -18,14 +18,14 @@ final class JsonResponseTest extends HackTest {
     ]);
     $handler = $r->getBody();
     if($handler is IO\CloseableHandle) {
-      await $handler->closeAsync();
+      $handler->close();
     }
     $re = await $read->readAsync();
     expect($re)->toBeSame('{}');
   }
 
   public async function testShouldReturnJsonBody(): Awaitable<void> {
-    list($read, $write) = IO\pipe_nd();
+    list($read, $write) = IO\pipe();
     await $write->writeAsync(\json_encode(new ImmMap(dict[
       'testing' => ImmMap{
         'HHVM' => 'Hack'
@@ -40,14 +40,14 @@ final class JsonResponseTest extends HackTest {
     ]);
     $handler = $r->getBody();
     if($handler is IO\CloseableHandle) {
-      await $handler->closeAsync();
+      $handler->close();
     }
     $re = await $read->readAsync();
     expect($re)->toBeSame('{"testing":{"HHVM":"Hack"}}');
   }
 
   public async function testShouldReturnAppendHeaders(): Awaitable<void> {
-    list($read, $write) = IO\pipe_nd();
+    list($read, $write) = IO\pipe();
     await $write->writeAsync(\json_encode(new ImmMap(dict['testing' => ImmMap{'HHVM' => 'Hack'}])));
     $r = new JsonResponse(
       $write,
@@ -64,7 +64,7 @@ final class JsonResponseTest extends HackTest {
     ]);
     $handler = $r->getBody();
     if($handler is IO\CloseableHandle) {
-      await $handler->closeAsync();
+      $handler->close();
     }
     $re = await $read->readAsync();
     expect($re)->toBeSame('{"testing":{"HHVM":"Hack"}}');

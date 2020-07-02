@@ -25,7 +25,7 @@ final class RequestTest extends HackTest {
   }
 
   public async function testCanConstructWithBody(): Awaitable<void> {
-    list($r, $w) = IO\pipe_nd();
+    list($r, $w) = IO\pipe();
     await $w->writeAsync('baz');
     $re = new Request(Message\HTTPMethod::GET, new Uri('/'), $r);
     expect($re->getBody())->toBeInstanceOf(IO\ReadHandle::class);
@@ -33,14 +33,14 @@ final class RequestTest extends HackTest {
   }
 
   public async function testNullBody(): Awaitable<void> {
-    list($r, $w) = IO\pipe_nd();
+    list($r, $w) = IO\pipe();
     $w->write(' ');
     $re = new Request(Message\HTTPMethod::GET, new Uri('/'), $r);
     expect($re->getBody()->read())->toBeSame(' ');
   }
 
   public async function testFalseyBody(): Awaitable<void> {
-    list($r, $w) = IO\pipe_nd();
+    list($r, $w) = IO\pipe();
     await $w->writeAsync('0');
     $re = new Request(Message\HTTPMethod::GET, new Uri('/'), $r);
     expect(await $re->getBody()->readAsync())->toBeSame('0');
@@ -95,7 +95,7 @@ final class RequestTest extends HackTest {
   }
 
   public async function testHostIsAddedFirst(): Awaitable<void> {
-    list($r, $w) = IO\pipe_nd();
+    list($r, $w) = IO\pipe();
     $w->write('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
@@ -108,7 +108,7 @@ final class RequestTest extends HackTest {
   }
 
   public async function testCanGetHeaderAsCsv(): Awaitable<void> {
-    list($r, $w) = IO\pipe_nd();
+    list($r, $w) = IO\pipe();
     $w->write('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
@@ -123,7 +123,7 @@ final class RequestTest extends HackTest {
   }
 
   public async function testHostIsNotOverwrittenWhenPreservingHost(): Awaitable<void> {
-    list($r, $w) = IO\pipe_nd();
+    list($r, $w) = IO\pipe();
     $w->write('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
@@ -148,7 +148,7 @@ final class RequestTest extends HackTest {
   }
 
   public async function testAggregatesHeaders(): Awaitable<void> {
-    list($r, $w) = IO\pipe_nd();
+    list($r, $w) = IO\pipe();
     $w->write('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
@@ -163,7 +163,7 @@ final class RequestTest extends HackTest {
   }
 
   public async function testSupportNumericHeaders(): Awaitable<void> {
-    list($r, $w) = IO\pipe_nd();
+    list($r, $w) = IO\pipe();
     $w->write('testing');
     $re = new Request(
       Message\HTTPMethod::GET,
